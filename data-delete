@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# All strand data
+#git filter-branch --force --index-filter \
+#  'git rm --cached --ignore-unmatch data/*'\
+#  --prune-empty --tag-name-filter cat -- --all
+
+# Strand data bin files only
+#git filter-branch --force --index-filter \
+#  'git rm --cached --ignore-unmatch data/*.bin'\
+#  --prune-empty --tag-name-filter cat -- --all

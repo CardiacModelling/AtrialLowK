@@ -1,0 +1,8 @@
+#/usr/bin/env bash
+python3 m4-ina.py courtemanche
+python3 m4-ina.py grandi
+python3 m4-ina.py koivumaki
+python3 m4-ina.py maleckar
+python3 m4-ina.py ni
+python3 m4-ina.py nygren
+python3 m4-ina.py voigt
