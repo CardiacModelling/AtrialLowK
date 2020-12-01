@@ -2,6 +2,13 @@
 
 This repository contains the code needed to reproduce the figures and simulations for the paper _"Small Decreases in Plasma K+ Prolong Action Potential Repolarization and May Promote Rhythm Disturbances in Human Atria"_.
 
+## Requirements
+
+- Python 3.4+
+- Myokit 1.30.0+
+- A working OpenCL installation is required for the tissue simulations
+- [Installation help for Myokit and OpenCL](http://myokit.org/install)
+
 ## Shared code and models
 
 - Shared code is stored in [`shared.py`](./shared.py) and used by several figures.
