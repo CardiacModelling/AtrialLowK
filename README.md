@@ -5,7 +5,7 @@ This repository contains the code needed to reproduce the figures and simulation
 ## Requirements
 
 - Python 3.4+
-- Myokit 1.30.0+
+- Myokit 1.30.1+
 - A working OpenCL installation is required for the tissue simulations
 - [Installation help for Myokit and OpenCL](http://myokit.org/install)
 
