@@ -54,7 +54,6 @@ For the fiber simulations:
   For the simulations in the main body of the paper, at baseline potasisum, use `m6a-strand-run.py voigt 5.4 40`.
 - For the "15 minute" experiments, run the same script but with the added argument "long", e.g. `m6a-strand-run.py voigt 5.4 40 long`
 - These scripts store generated data in [`strand-data`](./strand-data)
-- This data can be committed to the repo, or deleted, using the `data-commit` and `data-delete` scripts.
 - Supplemental figure results are generated and stored in [`sup-figure-m6a-strand-run`](./sup-figure-m6a-strand-run).
 
 For the strength-duration curves:
