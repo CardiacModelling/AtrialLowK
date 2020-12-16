@@ -128,9 +128,9 @@ if debug:
 #
 # Create figure
 #
-fig = plt.figure(figsize=(9, 5))  # Two-column size
-fig.subplots_adjust(0.075, 0.088, 0.99, 0.95)
-grid = matplotlib.gridspec.GridSpec(5, 4, wspace=0.60, hspace=1.5)
+fig = plt.figure(figsize=(9, 5.5))  # Two-column size
+fig.subplots_adjust(0.075, 0.085, 0.99, 0.88)
+grid = matplotlib.gridspec.GridSpec(5, 4, wspace=0.60, hspace=1.2)
 
 # Add model name
 name_font = {
@@ -142,10 +142,10 @@ fig.text(0.5, 0.975, shared.fancy_name(model), name_font)
 
 # Add panel letters
 letter_font = {'weight': 'bold', 'fontsize': 16}
-fig.text(0.002, 0.91, 'A', letter_font)
-fig.text(0.505, 0.91, 'B', letter_font)
-fig.text(0.002, 0.52, 'C', letter_font)
-fig.text(0.505, 0.52, 'D', letter_font)
+fig.text(0.002, 0.85, 'A', letter_font)
+fig.text(0.505, 0.85, 'B', letter_font)
+fig.text(0.002, 0.49, 'C', letter_font)
+fig.text(0.505, 0.49, 'D', letter_font)
 #fig.text(0.255, 0.91, 'B', letter_font)
 #fig.text(0.505, 0.91, 'C', letter_font)
 #fig.text(0.755, 0.91, 'D', letter_font)
@@ -157,24 +157,9 @@ ax = fig.add_subplot(grid[0:2, 0:2])
 ax.set_xlabel('Time (s)')
 ax.set_ylabel('V (mV)')
 for d, k, c in zip(d1s, ks, cs):
-    ax.plot(d.time() * 1e-3, d[v], label=f'{k}', color=c)
-ax.legend(loc='upper right')
-
-'''
-# B: Ki over time
-ax = fig.add_subplot(grid[0:2, 1])
-ax.set_xlabel('Time (s)')
-ax.set_ylabel('[K]i')
-for d, k, c in zip(d3s, ks, cs):
-    ax.plot(d.time() * 1e-3, d[ki], color=c)
-
-# C: Nai over time
-ax = fig.add_subplot(grid[0:2, 2])
-ax.set_xlabel('Time (s)')
-ax.set_ylabel('[Na]i')
-for d, k, c in zip(d3s, ks, cs):
-    ax.plot(d.time() * 1e-3, d[nai], color=c)
-'''
+    ax.plot(d.time() * 1e-3, d[v], label=f'{k} mM', color=c)
+ax.legend(loc=(0.352, 1.07), ncol=len(ks))
+ax.text(0.710, 0.87, 'After 1 second', transform=ax.transAxes)
 
 # D: Late change in AP waveform
 ax = fig.add_subplot(grid[0:2, 2:4])
@@ -182,6 +167,7 @@ ax.set_xlabel('Time (s)')
 ax.set_ylabel('V (mV)')
 for d, k, c in zip(d2s, ks, cs):
     ax.plot(d.time() * 1e-3, d[v], color=c)
+ax.text(0.665, 0.87, 'After 15 minutes', transform=ax.transAxes)
 
 # E: IK1 and INaK IV early
 ax = fig.add_subplot(grid[2:, :2])
@@ -190,6 +176,7 @@ ax.set_ylabel('I (A/F)')
 ax.set_xlim(*vlim)
 ax.set_ylim(-0.12, 0.39)
 ax.axhline(0, color='#bbbbbb')
+
 
 for k, xy, qr, c in zip(ks, ik1_v1, vrs1, cs):
     label = 'IK1' if k == 5.4 else None
@@ -205,7 +192,7 @@ ax.annotate(
 for k, xy, c in zip(ks, inak_v1, cs):
     label = 'INaK' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, ls='--', label=label)
-ax.text(0.028, 0.92, 'After 1 second', transform=ax.transAxes)
+ax.text(0.710, 0.92, 'After 1 second', transform=ax.transAxes)
 ax.legend(ncol=2, loc='lower right')
 #ax.grid(True)
 
@@ -221,7 +208,7 @@ for k, xy, qr, c in zip(ks, ik1_v2, vrs2, cs):
     ax.plot(xy[0], xy[1], color=c, label=label)
     ax.plot(qr[0], qr[1], 'o', color=c, fillstyle='none')
     ax.axvline(qr[0], color=c, alpha=0.75, lw=1, zorder=0)
-ax.text(0.028, 0.92, 'After 15 minutes', transform=ax.transAxes)
+ax.text(0.665, 0.92, 'After 15 minutes', transform=ax.transAxes)
 for k, xy, c in zip(ks, inak_v2, cs):
     label = 'INaK' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, ls='--', label=label)
