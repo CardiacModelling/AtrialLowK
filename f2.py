@@ -104,8 +104,6 @@ fig.text(0.520, 0.130, 'O', letter_font)
 
 # Action potential
 ax = fig.add_subplot(grid[0:2, 0])
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
 ax.set_xlabel('Time (ms)')
 ax.set_ylabel('V (mV)')
 ax.set_xlim(*xlim)
@@ -124,8 +122,6 @@ ax.text(0.7, 0.37, f'Vr = {vr2} mV',  transform=ax.transAxes,
         horizontalalignment='left', color='tab:orange')
 
 ax = fig.add_subplot(grid[0:2, 1])
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
 ax.set_xlabel('Time (ms)')
 ax.set_ylabel('V (mV)')
 ax.set_xlim(*xlim)
@@ -145,8 +141,6 @@ for i, variable in enumerate(variables):
     col = i // n
 
     ax = fig.add_subplot(grid[row, col])
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
     ax.set_xlim(*xlim)
     label_prop = {}
     #factor = factors.get(variable, 1)
@@ -172,8 +166,6 @@ for i, variable in enumerate(variables):
     # INa inset
     if variable == 'ina.INa':
         axi = ax.inset_axes([0.20, 0.35, 0.5, 0.5])
-        axi.spines['right'].set_visible(False)
-        axi.spines['top'].set_visible(False)
         axi.tick_params(labelsize='small')
         axi.set_xlim(-0.5, 3)
         axi.plot(d1.time(), d1['ina.INa'])

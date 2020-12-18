@@ -230,6 +230,7 @@ i_B_Na = phys.Cm * g_B_Na * (V - ina.E_Na)
 use membrane.V
 i_Na = phys.Cm * g_Na * m ^ 3 * h * j * (V - E_Na)
     in [pA]
+    label I_Na
 E_Na = phys.R * phys.T / phys.F * log(extra.Na_o / ion.Na_i)
     in [mV]
 g_Na = 7.8 [mS/uF]

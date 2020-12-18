@@ -291,6 +291,7 @@ gNa = 7.8 [nS/pF]
     in [nS/pF]
 INa = gNa * m ^3 * h * j * (V - nernst.ENa) * Cm * (1 - BA - BI)
     in [pA]
+    label I_Na
 
 
 #
@@ -671,7 +672,7 @@ use cell.Vss, cell.Vnonjunct3, cell.dx2
 Jj_nj = 2.5 * DCa * cell.Aj_nj / cell.xj_nj * (Ca_ss - Ca_i) * 1e-6 [nL / um^3]
     in [nL*mM/s]
 
-scaling = if(af.af == 1, 1.5, 1)    
+scaling = if(af.af == 1, 1.5, 1)
 kSRleak = 6e-3 [1/s]
     in [1/s]
 JSRCaleak3 = 0.5 * scaling * kSRleak * (Ca_SR1 - Ca_i) * Vnonjunct3

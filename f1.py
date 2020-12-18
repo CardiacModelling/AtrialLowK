@@ -47,18 +47,22 @@ shared.prepare_model(model1, protocol, fix_cleft_ko=True, pre_pace=not debug)
 shared.prepare_model(model2, protocol, fix_cleft_ko=True, pre_pace=not debug)
 
 # External potassium levels and colours
-ks = shared.ko_levels
-cs = shared.ko_colors
+ks = shared.ko_levels + [8]
+cs = shared.ko_colors + ['#777777']
+ls = ['-', '-', '-', '-', '--']
 if debug:
-    ks = [ks[3]]
-    cs = [cs[3]]
+    ks, cs, ls = [ks[3]], [cs[3]], [ls[3]]
 
 #
 # Create figure
 #
-fig = plt.figure(figsize=(9, 9))  # Two-column size
-fig.subplots_adjust(0.09, 0.05, 0.98, 0.96)
-grid = matplotlib.gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.4)
+#fig = plt.figure(figsize=(9, 9))  # Two-column size
+#fig.subplots_adjust(0.09, 0.05, 0.98, 0.96)
+#grid = matplotlib.gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.4)
+fig = plt.figure(figsize=(9, 7.5))  # Two-column size
+fig.subplots_adjust(0.08, 0.065, 0.99, 0.95)
+grid = matplotlib.gridspec.GridSpec(3, 2, wspace=0.2, hspace=0.3)
+
 
 # Add model names
 name_font = {
@@ -66,15 +70,14 @@ name_font = {
     'verticalalignment': 'center',
     'horizontalalignment': 'center',
 }
-fig.text(0.295, 0.98, shared.fancy_name(model1), name_font)
-fig.text(0.795, 0.98, shared.fancy_name(model2), name_font)
+fig.text(0.295, 0.98, shared.fancy_name(model2), name_font)
+fig.text(0.795, 0.98, shared.fancy_name(model1), name_font)
 
 # Add panel letters
 letter_font = {'weight': 'bold', 'fontsize': 16}
-fig.text(0.003, 0.942, 'A', letter_font)
-fig.text(0.003, 0.695, 'B', letter_font)
-fig.text(0.003, 0.45, 'C', letter_font)
-fig.text(0.003, 0.20, 'D', letter_font)
+fig.text(0.003, 0.940, 'A', letter_font)
+fig.text(0.003, 0.610, 'B', letter_font)
+fig.text(0.003, 0.290, 'C', letter_font)
 
 #
 # A. Plot APs
@@ -102,94 +105,32 @@ def ap(ax, model, protocol, levels):
         del(s)
 
     # Plot APs
-    for k, c, d, in zip(ks, cs, ds):
-        ax.plot(d.time(), d[vm], label=str(k) + ' mM', color=c)
+    for k, c, l, d, in zip(ks, cs, ls, ds):
+        ax.plot(d.time(), d[vm], label=str(k) + ' mM', color=c, ls=l)
 
     # Return resting potentials
     return vr
 
 # Plot APs, store Vrest
-ax1 = fig.add_subplot(grid[0, 0])
-ax1.set_xlabel('Time (ms)')
-ax1.set_ylabel('V (mV)')
-ax1.set_ylim(-81, 15)
-vr1 = ap(ax1, model1, protocol, ks)
-ax1.legend(loc='upper right')
-
-# Show regions of quasi-IV
-for time, box, color in zip(times1, boxes1, colors):
-    tr = 10
-    t1 = pre_time + time - tr
-    v1, vh = box
-    ax1.add_patch(matplotlib.patches.Rectangle(
-        (t1, v1), 2*tr, vh, color=color, fill=True, alpha=alpha))
-
-# Plot APs, store Vrest
-ax2 = fig.add_subplot(grid[0, 1])
-ax2.set_xlabel('Time (ms)')
-ax2.set_ylabel('V (mV)')
-ax2.set_ylim(-105, 34)
-ax2.set_yticks([-100, -80, -60, -40, -20, 0, 20, 40])
+ax = fig.add_subplot(grid[0, 0])
+ax.set_xlabel('Time (ms)')
+ax.set_ylabel('V (mV)')
+ax.set_ylim(-105, 34)
+ax.set_yticks([-100, -80, -60, -40, -20, 0, 20, 40])
 points = {5.4: (times2, colors, 's'), 3.2: (times2, colors, 'x')}
-vr2 = ap(ax2, model2, protocol, ks)
+vr2 = ap(ax, model2, protocol, ks)
+ax.legend(loc='upper right')
 
-# Show regions of quasi-IV
-for time, box, color in zip(times2, boxes2, colors):
-    tr = 10
-    t1 = pre_time + time - tr
-    v1, vh = box
-    ax2.add_patch(matplotlib.patches.Rectangle(
-        (t1, v1), 2*tr, vh, color=color, fill=True, alpha=alpha))
-
-#
-# B. Instantaneous IV curves
-#
-def quasi(ax, model, protocol, levels, lines, markers, times, colors):
-    print(f'Calculating quasi-IV for {model.name()}')
-
-    # Get the Ko variable
-    ko = model.labelx('K_o')
-
-    # Plot
-    ax.axhline(0, color='#cccccc')
-
-    # Calculate IV curves for each level
-    for k, ls, marker in zip(levels, lines, markers):
-
-        s = myokit.Simulation(model, protocol)
-        s.set_tolerance(1e-8, 1e-8)
-        s.set_constant(ko, k)
-        s.pre(1000)
-        vts, its, iv_voltages, iv_currents = shared.quasi_instantaneous_iv(
-            model, protocol, times, 'cellular_current', s)
-        label = f'{k} mM'
-        for vt, it, currents, c in zip(vts, its, iv_currents, colors):
-            ax.plot(iv_voltages, currents, color=c, ls=ls)
-            ax.plot(vt, it, color='k', marker=marker, ls=ls, label=label)
-            label = None
-
-ax1 = fig.add_subplot(grid[1, 0])
-ax1.set_xlabel('V (mV)')
-ax1.set_ylabel('I net (A/F)')
-ax1.set_xlim(-102, 22)
-ax1.set_ylim(-1.1, 1.1)
-quasi(ax1, model1, protocol, [5.4, 2.5], ['-', '--'], 'sx', times1, colors)
-ax1.legend(loc='upper left')
-ax1.text(0.65, 0.05, 'After 1 second', transform=ax1.transAxes)
-#ax1.annotate(
-#    'Vrest', xy=(-15, 0.3), xytext=(0, 0.1), textcoords='data',
-#    arrowprops=dict(arrowstyle='->', connectionstyle='arc3'))
-
-ax2 = fig.add_subplot(grid[1, 1])
-ax2.set_xlabel('V (mV)')
-ax2.set_ylabel('I net (A/F)')
-ax2.set_xlim(-102, 22)
-ax2.set_ylim(-1.1, 1.1)
-quasi(ax2, model2, protocol, [5.4, 2.5], ['-', '--'], 'sx', times2, colors)
-ax2.text(0.65, 0.05, 'After 1 second', transform=ax2.transAxes)
+ax = fig.add_subplot(grid[0, 1])
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
+ax.set_xlabel('Time (ms)')
+ax.set_ylabel('V (mV)')
+ax.set_ylim(-81, 15)
+vr1 = ap(ax, model1, protocol, ks)
 
 #
-# C. Calculate and plot IV curves for IK1
+# B. Calculate and plot IV curves for IK1
 #
 def ik1_iv(ax, model, protocol, levels, vrests):
     print(f'Calculating IK1 IV for {model.name()}')
@@ -214,32 +155,41 @@ def ik1_iv(ax, model, protocol, levels, vrests):
 
     # Plot
     ax.axhline(0, color='#bbbbbb')
-    for xy, c in zip(iv, cs):
-        ax.plot(xy[0], xy[1], color=c)
+    for xy, c, l in zip(iv, cs, ls):
+        ax.plot(xy[0], xy[1], color=c, ls=l)
     for vr, ir, c in zip(vrests, irs, cs):
         ax.plot(vr, ir, 'o', markersize=10, fillstyle='none', color=c)
 
-ax1 = fig.add_subplot(grid[2, 0])
-ax1.set_xlabel('V (mV)')
-ax1.set_ylabel('IK1 (A/F)')
-ax1.set_xlim(-112, -32)
-ax1.set_ylim(-0.9, 0.4)
-ik1_iv(ax1, model1, protocol, ks, vr1)
-ax1.text(0.65, 0.05, 'After 1 second', transform=ax1.transAxes)
-ax1.annotate(
-    'Vrest', xy=(-59, 0.02), xytext=(-50, -0.2), textcoords='data',
-    arrowprops=dict(arrowstyle='->', connectionstyle='arc3'))
+ax = fig.add_subplot(grid[1, 0])
+ax.set_xlabel('V (mV)')
+ax.set_ylabel('IK1 (A/F)')
+ax.set_xlim(-112, -32)
+ax.set_ylim(-0.8, 1.3)
+ik1_iv(ax, model2, protocol, ks, vr2)
+ax.text(0.65, 0.05, 'After 1 second', transform=ax.transAxes)
 
-ax2 = fig.add_subplot(grid[2, 1])
-ax2.set_xlabel('V (mV)')
-ax2.set_ylabel('IK1 (A/F)')
-ax2.set_xlim(-112, -32)
-ax2.set_ylim(-1.6, 1.1)
-ik1_iv(ax2, model2, protocol, ks, vr2)
-ax2.text(0.65, 0.05, 'After 1 second', transform=ax2.transAxes)
+ax = fig.add_subplot(grid[1, 1])
+ax.set_xlabel('V (mV)')
+ax.set_ylabel('IK1 (A/F)')
+ax.set_xlim(-112, -32)
+ax.set_ylim(-0.4, 0.4)
+ik1_iv(ax, model1, protocol, ks, vr1)
+ax.text(0.65, 0.05, 'After 1 second', transform=ax.transAxes)
+coords = [
+    ((-58, 0.02), (-42, -0.15)),
+    ((-66, 0.08), (-62, -0.20)),
+    ((-75, 0.22), (-68, 0.35)),
+    ((-75, 0.22), (-85, 0.35)),
+    ((-70, 0.08), (-74, -0.25)),
+]
+for k, c in zip(ks, coords):
+    ax.annotate(
+        f'Vr({k})', xy=c[0], xytext=c[1], textcoords='data',
+        arrowprops=dict(arrowstyle='->', connectionstyle='arc3'))
+
 
 #
-# D. INaK
+# C. INaK
 #
 def inak(ax, model, protocol, levels, colors):
 
@@ -281,24 +231,25 @@ def inak(ax, model, protocol, levels, colors):
     # Plot
     ax.axhline(0, color='#bbbbbb')
     ax.grid(True)
-    for xy, c in zip(ivs, colors):
-        ax.plot(xy[0], xy[1], color=c)
+    for xy, c, l in zip(ivs, colors, ls):
+        ax.plot(xy[0], xy[1], color=c, ls=l)
 
-ax1 = fig.add_subplot(grid[3, 0])
-ax1.set_xlabel('V (mV)')
-ax1.set_ylabel('INaK (A/F)')
-ax1.set_xlim(-102, 22)
-ax1.set_ylim(0.00, 0.36)
-inak(ax1, model1, protocol, ks, cs)
-ax1.text(0.65, 0.05, 'After 1 second', transform=ax1.transAxes)
+ax = fig.add_subplot(grid[2, 0])
+ax.set_xlabel('V (mV)')
+ax.set_ylabel('INaK (A/F)')
+ax.set_xlim(-102, 22)
+ax.set_ylim(0.00, 0.36)
+inak(ax, model2, protocol, ks, cs)
+ax.text(0.65, 0.05, 'After 1 second', transform=ax.transAxes)
 
-ax2 = fig.add_subplot(grid[3, 1])
-ax2.set_xlabel('V (mV)')
-ax2.set_ylabel('INaK (A/F)')
-ax2.set_xlim(-102, 22)
-ax2.set_ylim(0.00, 0.36)
-inak(ax2, model2, protocol, ks, cs)
-ax2.text(0.65, 0.05, 'After 1 second', transform=ax2.transAxes)
+ax = fig.add_subplot(grid[2, 1])
+ax.set_xlabel('V (mV)')
+ax.set_ylabel('INaK (A/F)')
+ax.set_xlim(-102, 22)
+ax.set_ylim(0.00, 0.36)
+inak(ax, model1, protocol, ks, cs)
+ax.text(0.65, 0.05, 'After 1 second', transform=ax.transAxes)
+
 
 # Align labels
 fig.align_labels()

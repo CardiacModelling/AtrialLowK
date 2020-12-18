@@ -1,66 +1,50 @@
 #!/usr/bin/env python3
 #
-# Combine strand simulation results for multiple concentrations
+# Figure x
 #
+import os
+import sys
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec
 import myokit
-import numpy as np
-import os
 import shared
-import sys
 
-# Get path for figures
+# Get path for figure
 fpath = shared.figure_dir()
 fname = 'figure-5'
 debug = 'debug' in sys.argv
 
-# Settings
-af = False
-cvt = 40
-n_beats = 1
-i_beat = 51
-i_final = i_beat + 1
-
-# Long or short-term?
-if 'long' in sys.argv:
-    fname = 'figure-6'
-    n_beats = 15 * 60
-    i_beat += n_beats - 1
-    i_final = i_beat + 1
-
 # Load model
 model = shared.model('voigt')
 name = model.name()
-print(f'Loaded {name}')
-
-# Get data file names
-dpath = 'strand-data'
-spath = 'sd-data'
-name1 = name + ('-af' if af else '')
-name2 = f'{name1}-cvt-{cvt}'
-
-# Set af mode
-if af:
-    print('Enabling AF mode')
-    shared.enable_af(model)
 
 # Create protocol
 cl = 1000
 protocol = myokit.pacing.blocktrain(cl, duration=0.5, offset=50)
 
+# Time to pre-pace after changing [K]o level
+n_beats = 481 #if not debug else 51
+text_1 = '1 sec'
+text_2 = '8 min'
+pre_time_1 = cl
+pre_time_2 = n_beats * cl
+
 # Prepare model
-shared.prepare_model(model, protocol, fix_cleft_ko=True, pre_pace=not debug)
+shared.prepare_model(
+    model, protocol, fix_cleft_ko=True, pre_pace=not debug, pA=True)
 
 # Get some variables
+time = model.time()
 vm = model.labelx('membrane_potential')
 ko = model.labelx('K_o')
-
-# Ko levels and colours
-ks = shared.ko_levels
-cs = shared.ko_colors
-nk = len(ks)
+nai = model.labelx('Na_i')
+ina = model.labelx('I_Na')
+inal = model.labelx('I_NaL')
+inab = model.labelx('I_NaB')
+inak = model.labelx('I_NaK')
+inaca = model.labelx('I_NaCa')
 
 # Get steady-state inactivation curve
 ina_j_inf = model.labelx('ina_j_inf')
@@ -69,43 +53,64 @@ fj = ina_j_inf.pyfunc()
 fh = ina_h_inf.pyfunc()
 f = lambda v: fj(v) * fh(v)
 ftm = model.get('ina.m.tau').pyfunc()
-
-# Calculate inactivation curve
 vs = np.linspace(-160, 40, 200)
 ss = f(vs)
 
-# Get Vrest for inf(h,j), and get _actual_ availability
-vrs = []
-avs = []
-ms = []
-for k in ks:
-    # Load state at start of final low-K pre-pacing beat
-    dname = f'{name2}-ko-{str(float(k)).replace(".", "-")}-state{i_beat}.zip'
-    path = os.path.join(dpath, dname)
-    if os.path.isfile(path):
-        state_final = myokit.load_state_bin(path)
-        # Get state in central cell
-        n = model.count_states()
-        state_final = state_final[0*n:1*n]
+# Perform simulations
+s = myokit.Simulation(model, protocol)
+ks = shared.ko_levels
+cs = shared.ko_colors
+nk = len(ks)
+beats = list(range(n_beats))
+data = []
+log_vars = [time, vm, nai, inak, inaca, ina, inal, inab]
 
-        vrs.append(state_final[vm.indice()])
-        ms.append(state_final[model.get('ina.m').indice()])
-        h = state_final[model.get('ina.h').indice()]
-        j = state_final[model.get('ina.j').indice()]
-        avs.append(h * j)
-        del(state_final)
-    else:
-        print(f'File not found {path}')
-        vrs.append(float('nan'))
-        ms.append(float('nan'))
-        avs.append(float('nan'))
+for k in ks:
+    print(f'Simulating {k}mM')
+
+    if debug:
+        k = 2.5
+
+    ts = []
+    aps = []
+    nais = []
+    qinas = []
+    qinabs = []
+    qinals = []
+    qinaks = []
+    qinacas = []
+
+    s.reset()
+    s.set_tolerance(1e-8, 1e-8)
+    s.set_constant(ko, k)
+    for beat in beats:
+        if beat % 100 == 0:
+            print('.', end='')
+        d = s.run(1000, log=log_vars).npview()
+        ts.append(d[time])
+        aps.append(d[vm])
+        nais.append(d[nai])
+        qinas.append(d.integrate(ina))
+        qinabs.append(d.integrate(inab))
+        qinals.append(d.integrate(inal))
+        qinaks.append(d.integrate(inak))
+        qinacas.append(d.integrate(inaca))
+    print('')
+
+    data.append([ts, aps, nais, qinas, qinabs, qinals, qinaks, qinacas])
+    del ts, aps, nais, qinas, qinabs, qinals, qinaks, qinacas
+
+    if debug:
+        for k in range(len(ks) - 1):
+            data.append(data[0])
+        break
 
 #
 # Create figure
 #
-fig = plt.figure(figsize=(9, 6))  # Two-column size
-fig.subplots_adjust(0.07, 0.073, 0.94, 0.95)
-grid = matplotlib.gridspec.GridSpec(3, 2, wspace=0.35, hspace=0.5)
+fig = plt.figure(figsize=(9, 8.5))  # Two-column size
+fig.subplots_adjust(0.09, 0.06, 0.985, 0.91)
+grid = matplotlib.gridspec.GridSpec(4, 4, wspace=0.60, hspace=0.50)
 
 # Add model name
 name_font = {
@@ -113,189 +118,151 @@ name_font = {
     'verticalalignment': 'center',
     'horizontalalignment': 'center',
 }
-fig.text(0.5, 0.98, shared.fancy_name(model), name_font)
+fig.text(0.5, 0.980, shared.fancy_name(model), name_font)
 
 # Add panel letters
 letter_font = {'weight': 'bold', 'fontsize': 16}
-fig.text(0.004, 0.93, 'A', letter_font)
-fig.text(0.004, 0.600, 'B', letter_font)
-fig.text(0.470, 0.600, 'C', letter_font)
-fig.text(0.470, 0.270, 'D', letter_font)
-
-# After text
-if n_beats == 1:
-    atext = 'After 1 second'
-else:
-    atext = n_beats / 60
-    atext = int(atext) if int(atext) == atext else round(atext, 1)
-    atext = f'After {atext} minutes'
+fig.text(0.003, 0.890, 'A', letter_font)
+fig.text(0.505, 0.890, 'B', letter_font)
+fig.text(0.003, 0.670, 'C', letter_font)
+fig.text(0.510, 0.670, 'D', letter_font)
+fig.text(0.003, 0.440, 'E', letter_font)
 
 #
-# Top: Refractory period
+# APs
 #
-row = matplotlib.gridspec.GridSpecFromSubplotSpec(
-    1, nk, subplot_spec=grid[0, :], wspace=0.2)
-
-for i, level in enumerate(shared.ko_levels):
-    print(f'Creating plot for ko={level}')
-    level_str = str(float(level)).replace('.', '-')
-
-    dname = f'{name2}-ko-{level_str}-beat{i_final}-cv.bin'
-    path = os.path.join(dpath, dname)
-    if not os.path.isfile(path):
-        print(f'File not found: {path}')
-        continue
-    d = myokit.DataBlock1d.load(path).to_log().npview()
-
-    dname = f'{name2}-ko-{level_str}-beat{i_final}-refractory-period.csv'
-    path = os.path.join(dpath, dname)
-    if not os.path.isfile(path):
-        print(f'File not found: {path}')
-        continue
-    csv = myokit.DataLog.load_csv(path).npview()
-
-    ax1 = fig.add_subplot(row[i])
-    ax2 = ax1.twinx()
-    ax2.set_ylim(-5, 85)
-
-    ax1.set_xlabel('Time (s)')
-    ax1.set_ylim(-95, 35)
-    if i == 0:
-        ax1.set_ylabel('V cell 1 (mV)')
-    else:
-        ax1.set_yticklabels([])
-    if i == 3:
-        ax2.set_ylabel('CV (cm/s)')
-    else:
-        ax2.set_yticklabels([' '])
-
-    ax2.axhline(40, color='k', alpha=0.1)
-    ax1.plot(d.time() * 1e-3, d['0.' + vm.qname()], color=cs[i])
-    ax2.plot(csv['ts'] * 1e-3, csv['vs'], 'x-', color='#777777')
-
-    ticks = [int(d.time()[0] * 1e-3)] * 3
-    ticks[1] += cl * 1e-3 / 2
-    ticks[2] += int(cl * 1e-3)
-    ax1.set_xticks(ticks)
-    ax1.set_xticklabels([str(x) for x in ticks])
-
-
-
-    # Add label showing ko level
-    ax2.text(0.15, 0.85, f'{level} mM', transform=ax2.transAxes)
+aplim = -80, 30
+ax1 = fig.add_subplot(grid[0, 0])
+ax1.set_xlabel('Time (s)')
+ax1.set_ylabel('V (mV)')
+ax1.set_ylim(aplim)
+ax2 = fig.add_subplot(grid[0, 1])
+ax2.set_xlabel('Time (s)')
+ax2.set_ylabel('V (mV)')
+ax2.set_ylim(aplim)
+for k, c, d in zip(ks, cs, data):
+    ts, aps = d[0], d[1]
+    ax1.plot(ts[1] * 1e-3, aps[1], label=f'{k} mM', color=c)
+    ax2.plot(ts[-1] * 1e-3, aps[-1], label=f'{k} mM', color=c)
+ax1.text(0.60, 0.90, text_1, transform=ax1.transAxes)
+ax2.text(0.60, 0.90, text_2, transform=ax2.transAxes)
+ax1.legend(loc=(1, 1.1), ncol=4)
 
 #
-# Bottom left: FRP, CV, WL
+# Na availability
 #
-row = matplotlib.gridspec.GridSpecFromSubplotSpec(
-    3, 1, subplot_spec=grid[1:, 0], hspace=0.1)
-
-# Gather data
-rp = []
-cv = []
-wl = []
-sd = []
-for level in ks:
-    level = float(level)
-    level_str = str(level).replace('.', '-')
-
-    dname = f'{name1}-cvt-40-ko-{level_str}-beat{i_final}-wavelength.csv'
-    path = os.path.join(dpath, dname)
-    if os.path.isfile(path):
-        print(f'Reading {path}')
-        d = myokit.DataLog.load_csv(path)
-        rp.append(d['rp'][0])   # ms
-        cv.append(d['cv'][0])   # cm/s
-        wl.append(d['wl'][0])   # mm
-    else:
-        print(f'File not found: {path}')
-        rp.append(float('nan'))
-        cv.append(float('nan'))
-        wl.append(float('nan'))
-
-    path = os.path.join(spath, f'sd-{name}-ko-{level_str}-b-{n_beats}.csv')
-    if os.path.isfile(path):
-        print(f'Reading {path}')
-        sd.append(myokit.DataLog.load_csv(path))
-    else:
-        print(f'File not found: {path}')
-        sd.append(float('nan'))
-
-# Graph FRP, CV and WL
-ax = fig.add_subplot(row[0, 0])
-ax.set_ylabel('FRP (ms)')
-ax.set_xlim(2, 8.2)
-ax.set_ylim(200, 600)
-ax.set_xticks(shared.ko_levels)
-ax.set_xticklabels([])
-ax.set_yticks([200, 300, 400, 500, 600])
-ax.plot(ks, rp, '-')
-for x, y, c in zip(ks, rp, shared.ko_colors):
-    ax.plot(x, y, 's', color=c)
-ax.text(0.98, 0.83, atext, transform=ax.transAxes, ha='right')
-
-ax = fig.add_subplot(row[1, 0])
-ax.set_ylabel('CV (cm/s)')
-ax.set_xlim(2, 8.2)
-ax.set_ylim(-10, 86)
-ax.set_xticks(shared.ko_levels)
-ax.set_xticklabels([])
-ax.set_yticks([0, 20, 40, 60, 80])
-ax.plot(ks, cv, '-')
-for x, y, c in zip(ks, cv, shared.ko_colors):
-    ax.plot(x, y, 's', color=c)
-
-ax = fig.add_subplot(row[2, 0])
-ax.set_xlabel('External potassium concentration')
-ax.set_ylabel('WL (mm)')
-ax.set_xlim(2, 8.2)
-ax.set_ylim(160, 400)
-ax.set_yticks([200, 300, 400])
-ax.set_xticks(shared.ko_levels)
-ax.plot(ks, wl, '-')
-for x, y, c in zip(ks, wl, shared.ko_colors):
-    ax.plot(x, y, 's', color=c)
-
-#
-# Bottom right: INa
-#
-row = matplotlib.gridspec.GridSpecFromSubplotSpec(
-    2, 1, subplot_spec=grid[1:, 1], hspace=0.5)
-
-# INa inactivation
-ax = fig.add_subplot(row[0, 0])
-ax.set_ylabel('Recovered INa')
-ax.set_xlabel('V (mV)')
-ax.set_xlim(-130, -20)
-ax.set_ylim(-0.05, 1.05)
-ax.plot(vs, ss, color='#999999')
-ax.plot(vs, fh(vs), '--', color='#dddddd')
+ax1 = fig.add_subplot(grid[0, 2])
+ax1.set_ylabel('Recovered INa')
+ax1.set_xlabel('V (mV)')
+ax1.set_xlim(-95, -40)
+ax1.set_ylim(-0.05, 1.05)
+ax1.plot(vs, ss, color='#999999')
+#ax.plot(vs, fh(vs), '--', color='#dddddd')
 #ax.plot(vs, fj(vs), ':', color='#dddddd')
-for vr, k, c in zip(vrs, ks, cs):
-    ax.plot([vr], [f(vr)], 'o', markersize=8, fillstyle='none', color=c,
-            label=f'{k} mM')
-#for av, k, c in zip(avs, ks, cs):
-#    ax.axhline(av, color=c)
-ax.legend(loc='lower left').get_frame().set_alpha(1)
-ax.text(0.96, 0.83, atext, transform=ax.transAxes, ha='right')
-
-# Strength-duration
-ax = fig.add_subplot(row[1, 0])
-ax.set_xlabel('Stimulus duration (ms)')
-ax.set_ylabel('-1x Stimulus\namplitude (A/F)')
-ax.set_xlim(0, 6)
-ax.set_ylim(0, 42)
-ax.plot(vs, ss, color='#999999')
-for k, c, d in zip(ks, cs, sd):
-    ax.plot(d['duration'], d['amplitude'], color=c)
-ax.text(0.96, 0.83, atext, transform=ax.transAxes, ha='right')
+ax2 = fig.add_subplot(grid[0, 3])
+ax2.set_ylabel('Recovered INa')
+ax2.set_xlabel('V (mV)')
+ax2.set_xlim(-95, -40)
+ax2.set_ylim(-0.05, 1.05)
+ax2.plot(vs, ss, color='#999999')
+for k, c, d in zip(ks, cs, data):
+    aps = d[1]
+    vr1 = aps[1][0]
+    vr2 = aps[-1][0]
+    ax1.plot([vr1], [f(vr1)], 'o', markersize=8, fillstyle='none', color=c)
+    ax2.plot([vr2], [f(vr2)], 'o', markersize=8, fillstyle='none', color=c)
+ax1.text(0.60, 0.90, text_1, transform=ax1.transAxes)
+ax2.text(0.60, 0.90, text_2, transform=ax2.transAxes)
 
 #
-# Store
+# Vr
 #
-fname = f'{fname}'
+ax = fig.add_subplot(grid[1, :2])
+ax.set_xlabel('Time (s)')
+ax.set_ylabel('Vr (mV)')
+for k, c, d in zip(ks, cs, data):
+    aps = d[1]
+    vr = np.array([x[0] for x in aps])
+    ax.plot(beats, vr, label=f'{k} mM', color=c)
+
+#
+# [Na]i
+#
+ax = fig.add_subplot(grid[1, 2:])
+ax.set_xlabel('Time (s)')
+ax.set_ylabel('[Na]i (mM)')
+for k, c, d in zip(ks, cs, data):
+    nas = d[2]
+    na = np.array([x[0] for x in nas])
+    ax.plot(beats, na, label=f'{k} mM', color=c, zorder=99)
+
+axi = ax.inset_axes([0.06, 0.23, 0.25, 0.4])
+axi.tick_params(labelsize='small')
+axi.set_xticklabels([])
+axi.set_yticklabels([])
+axi.set_ylim(-60, 10)
+i = 90
+axi.set_xlim(i * cl, i * cl + 500)
+axi.plot(data[0][0][i], data[0][1][i], color='tab:orange')
+ax.arrow(i, 9.09, -40, -0.2, zorder=99, color='tab:orange')
+
+axi = ax.inset_axes([0.50, 0.32, 0.25, 0.4])
+axi.tick_params(labelsize='small')
+axi.set_xticklabels([])
+axi.set_yticklabels([])
+axi.set_ylim(-60, 10)
+i = 180
+axi.set_xlim(i * cl, i * cl + 500)
+axi.plot(data[0][0][i], data[0][1][i], color='tab:purple')
+ax.arrow(i + 3, 8.77, 40, 0.08, zorder=99, color='tab:purple')
+
+#
+# Na ions carried per beat, over time
+#
+qlim = 38000, 93000
+sg = matplotlib.gridspec.GridSpecFromSubplotSpec(
+    1, 4, subplot_spec=grid[2:, 0:4], hspace=0, wspace=0.05)
+for i, k in enumerate(ks):
+    ts, aps, nais, qinas, qinabs, qinals, qinaks, qinacas = data[i]
+
+    ax = fig.add_subplot(sg[0, len(ks) - 1 - i])
+    ax.text(n_beats // 2, 92000, f'{k} mM', horizontalalignment='center')
+
+    ax.set_xlabel('Time (s)')
+    if i == 3:
+        ax.set_ylabel('Na+ ions carried per beat')
+    else:
+        ax.set_yticklabels([])
+    ax.set_ylim(*qlim)
+    qinaks1 = 3 * np.array([x[-1] for x in qinaks])
+    qinacas1 = -3 * np.array([x[-1] for x in qinacas])
+    qinas1 = -1 * np.array([x[-1] for x in qinas])
+    qinabs1 = -1 * np.array([x[-1] for x in qinabs])
+    qinals1 = -1 * np.array([x[-1] for x in qinals])
+
+    cmap = matplotlib.cm.get_cmap('tab10')
+    ax.plot(beats, qinaks1, label='INaK', color=cmap(0))
+
+    out = qinacas1
+    ax.fill_between(beats, out * 0, out, color=cmap(1), alpha=0.1)
+    ax.plot(beats, out, label='INaCa', color=cmap(1))
+
+    plus = out + qinabs1
+    ax.fill_between(beats, out, plus, color=cmap(2), alpha=0.1)
+    out = plus
+    ax.plot(beats, out, label='... + INaB', color=cmap(2))
+
+    plus = out + qinas1
+    ax.fill_between(beats, out, plus, color=cmap(3), alpha=0.1)
+    out = plus
+    ax.plot(beats, out, label='... + INa', color=cmap(3))
+
+    if i == 3:
+        ax.legend()
+
+# Show / store
 path = os.path.join(fpath, fname)
-print(f'Writing figure to {path}')
-plt.savefig(f'{path}.png')
-plt.savefig(f'{path}.pdf')
-
+print('Saving to ' + path)
+plt.savefig(path + '.png')
+plt.savefig(path + '.pdf')
+print('Done')

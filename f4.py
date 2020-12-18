@@ -26,7 +26,7 @@ protocol = myokit.pacing.blocktrain(cl, duration=0.5, offset=50)
 
 # Maximum time and voltage range to show in plots
 tmax = 800
-vlim = -102, 2
+vlim = -95, -20
 
 # Time to pre-pace after changing [K]o level
 pre_time_1 = 1000
@@ -85,13 +85,18 @@ for k in ks:
             state.set_state_value(x[i])
         else:
             state.set_rhs(x[i])
-    inak_v1.append((vs, finak.pyfunc()(vs)))
+
+    vr = [s.state()[v.indice()]]
+
+    f = finak.pyfunc()
+    vr.append(f(vr[0]))
+    inak_v1.append((vs, f(vs)))
+
     f = fik1.pyfunc()
+    vr.append(f(vr[0]))
     ik1_v1.append((vs, f(vs)))
 
-    # Store vrest and ik1(vrest)
-    vr = s.state()[v.indice()]
-    vrs1.append((vr, f(vr)))
+    vrs1.append(vr)
 
     # Simulate early AP
     d1s.append(s.run(tmax).npview())
@@ -109,13 +114,18 @@ for k in ks:
             state.set_state_value(x[i])
         else:
             state.set_rhs(x[i])
-    inak_v2.append((vs, finak.pyfunc()(vs)))
+
+    vr = [s.state()[v.indice()]]
+
+    f = finak.pyfunc()
+    vr.append(f(vr[0]))
+    inak_v2.append((vs, f(vs)))
+
     f = fik1.pyfunc()
+    vr.append(f(vr[0]))
     ik1_v2.append((vs, f(vs)))
 
-    # Store vrest and ik1(vrest)
-    vr = s.state()[v.indice()]
-    vrs2.append((vr, f(vr)))
+    vrs2.append(vr)
 
     # Simulate late AP
     d2s.append(s.run(tmax).npview())
@@ -128,9 +138,9 @@ if debug:
 #
 # Create figure
 #
-fig = plt.figure(figsize=(9, 5.5))  # Two-column size
-fig.subplots_adjust(0.075, 0.085, 0.99, 0.88)
-grid = matplotlib.gridspec.GridSpec(5, 4, wspace=0.60, hspace=1.2)
+fig = plt.figure(figsize=(9, 6.5))  # Two-column size
+fig.subplots_adjust(0.085, 0.075, 0.98, 0.95)
+grid = matplotlib.gridspec.GridSpec(5, 4, wspace=0.60, hspace=1.0)
 
 # Add model name
 name_font = {
@@ -142,15 +152,10 @@ fig.text(0.5, 0.975, shared.fancy_name(model), name_font)
 
 # Add panel letters
 letter_font = {'weight': 'bold', 'fontsize': 16}
-fig.text(0.002, 0.85, 'A', letter_font)
-fig.text(0.505, 0.85, 'B', letter_font)
-fig.text(0.002, 0.49, 'C', letter_font)
-fig.text(0.505, 0.49, 'D', letter_font)
-#fig.text(0.255, 0.91, 'B', letter_font)
-#fig.text(0.505, 0.91, 'C', letter_font)
-#fig.text(0.755, 0.91, 'D', letter_font)
-#fig.text(0.002, 0.52, 'E', letter_font)
-#fig.text(0.505, 0.52, 'F', letter_font)
+fig.text(0.002, 0.930, 'A', letter_font)
+fig.text(0.495, 0.920, 'B', letter_font)
+fig.text(0.002, 0.546, 'C', letter_font)
+fig.text(0.495, 0.546, 'D', letter_font)
 
 # A: Immediate change in AP waveform
 ax = fig.add_subplot(grid[0:2, 0:2])
@@ -158,8 +163,9 @@ ax.set_xlabel('Time (s)')
 ax.set_ylabel('V (mV)')
 for d, k, c in zip(d1s, ks, cs):
     ax.plot(d.time() * 1e-3, d[v], label=f'{k} mM', color=c)
-ax.legend(loc=(0.352, 1.07), ncol=len(ks))
-ax.text(0.710, 0.87, 'After 1 second', transform=ax.transAxes)
+#ax.legend(loc=(0.352, 1.07), ncol=len(ks))
+ax.legend(loc='upper right', ncol=1)
+ax.text(0.15, 0.87, 'After 1 second', transform=ax.transAxes)
 
 # D: Late change in AP waveform
 ax = fig.add_subplot(grid[0:2, 2:4])
@@ -167,48 +173,46 @@ ax.set_xlabel('Time (s)')
 ax.set_ylabel('V (mV)')
 for d, k, c in zip(d2s, ks, cs):
     ax.plot(d.time() * 1e-3, d[v], color=c)
-ax.text(0.665, 0.87, 'After 15 minutes', transform=ax.transAxes)
+ax.text(0.15, 0.87, 'After 15 minutes', transform=ax.transAxes)
 
-# E: IK1 and INaK IV early
+# C: IK1 and INaK IV early
 ax = fig.add_subplot(grid[2:, :2])
 ax.set_xlabel('V (mV)')
 ax.set_ylabel('I (A/F)')
 ax.set_xlim(*vlim)
-ax.set_ylim(-0.12, 0.39)
+ax.set_ylim(-0.10, 0.30)
 ax.axhline(0, color='#bbbbbb')
-
-
 for k, xy, qr, c in zip(ks, ik1_v1, vrs1, cs):
     label = 'IK1' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, label=label)
     ax.plot(qr[0], qr[1], 'o', color=c, fillstyle='none')
-    ax.axvline(qr[0], color=c, alpha=0.75, lw=1, zorder=0)
+    ax.plot(qr[0], qr[2], 'o', color=c, fillstyle='none')
 ax.annotate(
     'Vrest',
-    xy=(vrs1[0][0], vrs1[0][1] - 0.01),
+    xy=(vrs1[0][0], vrs1[0][2] - 0.01),
     xytext=(vrs1[0][0] + 3, -0.04),
     textcoords='data',
     arrowprops=dict(arrowstyle='->', connectionstyle='arc3'))
 for k, xy, c in zip(ks, inak_v1, cs):
     label = 'INaK' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, ls='--', label=label)
-ax.text(0.710, 0.92, 'After 1 second', transform=ax.transAxes)
+ax.text(0.05, 0.95, 'After 1 second', transform=ax.transAxes)
 ax.legend(ncol=2, loc='lower right')
 #ax.grid(True)
 
-# F: IK1 and INaK IV late
+# D: IK1 INaK IV late
 ax = fig.add_subplot(grid[2:, 2:])
 ax.set_xlabel('V (mV)')
 ax.set_ylabel('IK1 (A/F)')
 ax.set_xlim(*vlim)
-ax.set_ylim(-0.12, 0.39)
+ax.set_ylim(-0.10, 0.30)
 ax.axhline(0, color='#bbbbbb')
 for k, xy, qr, c in zip(ks, ik1_v2, vrs2, cs):
     label = 'IK1' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, label=label)
     ax.plot(qr[0], qr[1], 'o', color=c, fillstyle='none')
-    ax.axvline(qr[0], color=c, alpha=0.75, lw=1, zorder=0)
-ax.text(0.665, 0.92, 'After 15 minutes', transform=ax.transAxes)
+    ax.plot(qr[0], qr[2], 'o', color=c, fillstyle='none')
+ax.text(0.05, 0.95, 'After 15 minutes', transform=ax.transAxes)
 for k, xy, c in zip(ks, inak_v2, cs):
     label = 'INaK' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, ls='--', label=label)

@@ -77,8 +77,8 @@ for k in ks:
 # Create figure
 #
 fig = plt.figure(figsize=(9, 4.2))  # Two-column size
-fig.subplots_adjust(0.10, 0.11, 0.995, 0.935)
-grid = matplotlib.gridspec.GridSpec(2, nk, wspace=0.04, hspace=0.04)
+fig.subplots_adjust(0.08, 0.11, 0.995, 0.935)
+grid = matplotlib.gridspec.GridSpec(2, nk, wspace=0.08, hspace=0.05)
 
 # Add model name
 # Add model name
@@ -213,7 +213,7 @@ level = 4
 if level in ks:
     i = ks.index(level)
     t, r = 1010, rm[i][1][0]
-    axes[i].annotate(str(int(np.round(r, 0))), (t, r), (t + 5, r + 1000), arrowprops=ar)
+    axes[i].annotate(str(int(np.round(r, 0))), (t, r), (t + 15, r + 1000), arrowprops=ar)
     t, r = txs[i][0], rxs[i][0]
     axes[i].annotate(str(int(np.round(r, 0))), (t, r), (t - 30, r + 700), arrowprops=ar)
     t, r = txs[i][1], rxs[i][1]
@@ -228,7 +228,7 @@ if level in ks:
     t, r = txs[i][0], rxs[i][0]
     axes[i].annotate(str(int(np.round(r, 0))), (t, r), (t - 30, r + 700), arrowprops=ar)
     t, r = txs[i][1], rxs[i][1]
-    axes[i].annotate(str(int(np.round(r, 0))), (t, r), (t + 10, r + 1200), arrowprops=ar)
+    axes[i].annotate(str(int(np.round(r, 0))), (t, r), (t - 10, r + 1200), arrowprops=ar)
 
 # Annotate graph for 8
 level = 8

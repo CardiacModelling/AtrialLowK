@@ -149,6 +149,7 @@ PNa = 0.0018 [nL/s]
     in [nL/s]
 INa = PNa * m^3 * (0.9 * h1 + 0.1 * h2) * extra.Nao * V * F * FRT * (exp((V - nernst.ENa) * FRT) - 1) / (exp(V * FRT) - 1)
     in [pA]
+    label I_Na
 
 
 #
@@ -408,7 +409,7 @@ FRT = 1 / RTF
 # Cell geometry
 #
 # The cell is modelled as a sequence of cylinders, one surrounding the other.
-# 
+#
 # ------------
 # |ss
 # |------------
@@ -439,7 +440,7 @@ dx = 1.625 [um]
 
 # Diffusion compartment volumes
 #
-# Vnonjunct1 is a cylinder with radius dx, so has volume 
+# Vnonjunct1 is a cylinder with radius dx, so has volume
 #   pi*r^2*length = dx^2 * pi * lcell
 # However, diffusion is restricted to half of this volume:
 #   "The accessible volume for the Ca2+ diffusion in the cytosol and in the SR

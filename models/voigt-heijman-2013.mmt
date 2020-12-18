@@ -8,7 +8,7 @@ It is based on the atrial model by Grandi et al. [2], but with an added IK,ACh
 current adapted from [3], the INa current from [4], and modifications to IK1
 and its dependence on the external potassium concentration.
 
-This model file was adapted (reformatting only) from code provided by Henry 
+This model file was adapted (reformatting only) from code provided by Henry
 Sutanto and Jordi Heijman.
 
 The stimulus was set to 0.5[ms] and approximately twice the threshold value for
@@ -17,7 +17,7 @@ depolarisation.
 [1] Impaired Na + -dependent regulation of acetylcholine-activated
     inward-rectifier K+ current modulates action potential rate dependence in
     patients with chronic atrial fibrillation.
-    Niels Voigt & Jordi Heijman (shared first), Anne Trausch, Elisa 
+    Niels Voigt & Jordi Heijman (shared first), Anne Trausch, Elisa
     Mintert-Jancke, Lutz Pott, Ursula Ravens, Dobromir Dobrev.
     2013, Journal of Molecular and Cellular Cardiology, 61, 142-152.
     https://doi.org/10.1016/j.yjmcc.2013.03.011
@@ -29,7 +29,7 @@ depolarisation.
     2011, Circulation Research, 109(9):1055-1066.
     https://doi.org/10.1161/CIRCRESAHA.111.253955
 
-[3] Cholinergic Atrial Fibrillation in a Computer Model of a Two-Dimensional 
+[3] Cholinergic Atrial Fibrillation in a Computer Model of a Two-Dimensional
     Sheet of Canine Atrial Cells With Realistic Ionic Properties
     James Kneller, Renqiang Zou, Edward J Vigmond, Zhiguo Wang, L Joshua Leon,
     Stanley Nattel
@@ -118,7 +118,7 @@ I_stim = engine.pace * amplitude
     in [A/F]
     label stimulus_current
     desc: """
-        Under baseline conditions, at 1Hz with a 0.5ms stimulus, -24.10 pA is 
+        Under baseline conditions, at 1Hz with a 0.5ms stimulus, -24.10 pA is
         approximately the smallest value that triggers three successive APs.
         """
 
@@ -274,6 +274,7 @@ INa_sl = junc.Fsl * gNa * m^3 * h * j * (V - nernst.ENa_sl)
     in [A/F]
 INa = INa_jn + INa_sl
     in [A/F]
+    label I_Na
 
 
 #
@@ -298,6 +299,7 @@ INaL_sl = junc.Fsl * gNaL * ml^3 * hl * (V - nernst.ENa_sl)
     in [A/F]
 INaL = INaL_jn + INaL_sl
     in [A/F]
+    label I_NaL
 
 
 #
@@ -313,6 +315,7 @@ INaB_sl = junc.Fsl * gNaB * (V - nernst.ENa_sl)
     in [A/F]
 INaB = INaB_jn + INaB_sl
     in [A/F]
+    label I_NaB
 
 
 #

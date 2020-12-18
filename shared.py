@@ -12,10 +12,16 @@ import myokit.lib.hh
 import numpy as np
 
 
+# Update matplotlib styles
+matplotlib.rcParams['axes.spines.right'] = False
+matplotlib.rcParams['axes.spines.top'] = False
+
+
 # Extracellular Potassium concentrations
-ko_levels = [2.5, 3.2, 4, 5.4, 8]
-ko_colors = ['k', '#5e3c99', '#b2abd2', '#fdb863', '#e66101']
+ko_levels = [2.5, 3.2, 4, 5.4]
+#ko_colors = ['k', '#5e3c99', '#b2abd2', '#fdb863', '#e66101']
 #ko_colors = ['#1d003b', '#6e4ca9', '#b2abd2', '#fdb863', '#e66101']
+ko_colors = ['#000000', '#d7191c', '#fdae61', '#2c7bb6']
 
 
 # Models
