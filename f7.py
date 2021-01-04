@@ -80,7 +80,8 @@ def refrac(ax, i_final, atext):
     # Gather data
     ap, rp, cv, wl, vr = [], [], [], [], []
 
-    # Create axes
+    # Update axes
+    ax.minorticks_on()
     ax.set_xlabel('Time (s)')
     ax.set_ylim(-85, 35)
     ax.set_xlabel('Time (ms)')

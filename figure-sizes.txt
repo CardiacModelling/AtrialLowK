@@ -12,8 +12,8 @@ Matplotlib likes inches, so approx:
 However, matplotlib chooses quite large fonts and thick lines by default...
 So looks nicer to use
 
-1 column ~ 4.28 inches
-2 column ~ 9 inches
+1 column ~ 4.28 inches (10.8712 cm)
+2 column ~ 9 inches (22.86 cm)
 
 I measured the ratios in frontiers figures to get max heights (including
 caption) of

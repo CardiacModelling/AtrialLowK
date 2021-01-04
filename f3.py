@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec
+import matplotlib.transforms
 import myokit
 import shared
 
@@ -42,7 +43,7 @@ ks = shared.ko_levels
 cs = shared.ko_colors
 nk = len(ks)
 if debug:
-    ks = [8] * nk
+    ks = [2.5] * nk
 
 ds = [] # Logs with an AP in
 rm = [] # Vectors time, Rm
@@ -146,19 +147,22 @@ for ax, k, d, c in zip(axes, ks, ds, cs):
 
 for ax in axes[1:]:
     ax.set_yticklabels('')
-    ax.tick_params(axis='both', direction='in')
+    #ax.tick_params(axis='both', direction='in')
 
 # B: Change in input resistance
 axes = [fig.add_subplot(grid[1, i]) for i in range(nk)]
 for ax in axes:
+    ax.minorticks_on()
+    ax.tick_params(axis='x', which='minor', bottom=False)
     ax.set_xlabel('Time (ms)')
     ax.set_xlim(pre_time, pre_time + tmax)
     ax.set_ylim(-250, 3200)
 for ax in axes[1:]:
     ax.set_yticklabels('')
-    ax.tick_params(axis='y', direction='in')
+    #ax.tick_params(axis='y', which='both', direction='in')
 axes[0].set_ylabel('R (MOhm)')
 
+# For each concentration...
 for ax, rtr, c, tx in zip(axes, rm, cs, txs):
     rt = rtr[0] + pre_time
     rr = np.array(rtr[1])
@@ -170,7 +174,18 @@ for ax, rtr, c, tx in zip(axes, rm, cs, txs):
             x.append(interpy(rt, rr, t))
     rxs.append(x)
 
-    ax.plot(rt, rr, ':', color=c)
+    # Plot straight line at any zero crossing
+    ic = np.nonzero(rr[1:] * rr[:-1] < 0)
+    for i in ic:
+        ax.plot((rt[i+1], rt[i+1]), (rr[i], rr[i + 1]), ':', color=c)
+
+    # Shade areas with negative resistance
+    trans = matplotlib.transforms.blended_transform_factory(
+        ax.transData, ax.transAxes)
+    ax.fill_between(rt, 0, 1, where=rr <= 0,
+                    facecolor='black', alpha=0.1, transform=trans)
+
+    # Plot line with zero parts filtered out
     rr[rr < 0] = float('nan')
     ax.plot(rt, rr, color=c)
 

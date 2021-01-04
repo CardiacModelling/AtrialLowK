@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Figure x
+# Figure: Changes in [Na]i
 #
 import os
 import sys
@@ -10,6 +10,10 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec
 import myokit
 import shared
+
+# Minor y-ticks all round
+matplotlib.rcParams['xtick.minor.visible'] = True
+matplotlib.rcParams['ytick.minor.visible'] = True
 
 # Get path for figure
 fpath = shared.figure_dir()
@@ -21,7 +25,7 @@ model = shared.model('voigt')
 name = model.name()
 
 # Create protocol
-cl = 1000
+cl = 1000   # MUST be 1000 for units nC to work out
 protocol = myokit.pacing.blocktrain(cl, duration=0.5, offset=50)
 
 # Time to pre-pace after changing [K]o level
@@ -90,11 +94,12 @@ for k in ks:
         ts.append(d[time])
         aps.append(d[vm])
         nais.append(d[nai])
-        qinas.append(d.integrate(ina))
-        qinabs.append(d.integrate(inab))
-        qinals.append(d.integrate(inal))
-        qinaks.append(d.integrate(inak))
-        qinacas.append(d.integrate(inaca))
+        # pA * 1s = pC, *1e-3 = nC
+        qinas.append(d.integrate(ina) * 1e-3)
+        qinabs.append(d.integrate(inab) * 1e-3)
+        qinals.append(d.integrate(inal) * 1e-3)
+        qinaks.append(d.integrate(inak) * 1e-3)
+        qinacas.append(d.integrate(inaca) * 1e-3)
     print('')
 
     data.append([ts, aps, nais, qinas, qinabs, qinals, qinaks, qinacas])
@@ -109,7 +114,7 @@ for k in ks:
 # Create figure
 #
 fig = plt.figure(figsize=(9, 8.5))  # Two-column size
-fig.subplots_adjust(0.09, 0.06, 0.985, 0.91)
+fig.subplots_adjust(0.07, 0.06, 0.985, 0.91)
 grid = matplotlib.gridspec.GridSpec(4, 4, wspace=0.60, hspace=0.50)
 
 # Add model name
@@ -151,52 +156,50 @@ ax1.legend(loc=(1, 1.1), ncol=4)
 #
 # Na availability
 #
-ax1 = fig.add_subplot(grid[0, 2])
-ax1.set_ylabel('Recovered INa')
-ax1.set_xlabel('V (mV)')
-ax1.set_xlim(-95, -40)
-ax1.set_ylim(-0.05, 1.05)
-ax1.plot(vs, ss, color='#999999')
-#ax.plot(vs, fh(vs), '--', color='#dddddd')
-#ax.plot(vs, fj(vs), ':', color='#dddddd')
-ax2 = fig.add_subplot(grid[0, 3])
-ax2.set_ylabel('Recovered INa')
-ax2.set_xlabel('V (mV)')
-ax2.set_xlim(-95, -40)
-ax2.set_ylim(-0.05, 1.05)
-ax2.plot(vs, ss, color='#999999')
+ax3 = fig.add_subplot(grid[0, 2])
+ax3.set_ylabel('Recovered INa')
+ax3.set_xlabel('V (mV)')
+ax3.set_xlim(-95, -40)
+ax3.set_ylim(-0.05, 1.05)
+ax3.plot(vs, ss, color='#999999')
+ax4 = fig.add_subplot(grid[0, 3])
+ax4.set_ylabel('Recovered INa')
+ax4.set_xlabel('V (mV)')
+ax4.set_xlim(-95, -40)
+ax4.set_ylim(-0.05, 1.05)
+ax4.plot(vs, ss, color='#999999')
 for k, c, d in zip(ks, cs, data):
     aps = d[1]
     vr1 = aps[1][0]
     vr2 = aps[-1][0]
-    ax1.plot([vr1], [f(vr1)], 'o', markersize=8, fillstyle='none', color=c)
-    ax2.plot([vr2], [f(vr2)], 'o', markersize=8, fillstyle='none', color=c)
-ax1.text(0.60, 0.90, text_1, transform=ax1.transAxes)
-ax2.text(0.60, 0.90, text_2, transform=ax2.transAxes)
+    ax3.plot([vr1], [f(vr1)], 'o', markersize=8, fillstyle='none', color=c)
+    ax4.plot([vr2], [f(vr2)], 'o', markersize=8, fillstyle='none', color=c)
+ax3.text(0.60, 0.90, text_1, transform=ax3.transAxes)
+ax4.text(0.60, 0.90, text_2, transform=ax4.transAxes)
 
 #
 # Vr
 #
-ax = fig.add_subplot(grid[1, :2])
-ax.set_xlabel('Time (s)')
-ax.set_ylabel('Vr (mV)')
+ax5 = fig.add_subplot(grid[1, :2])
+ax5.set_xlabel('Time (s)')
+ax5.set_ylabel('Vr (mV)')
 for k, c, d in zip(ks, cs, data):
     aps = d[1]
     vr = np.array([x[0] for x in aps])
-    ax.plot(beats, vr, label=f'{k} mM', color=c)
+    ax5.plot(beats, vr, label=f'{k} mM', color=c)
 
 #
 # [Na]i
 #
-ax = fig.add_subplot(grid[1, 2:])
-ax.set_xlabel('Time (s)')
-ax.set_ylabel('[Na]i (mM)')
+ax6 = fig.add_subplot(grid[1, 2:])
+ax6.set_xlabel('Time (s)')
+ax6.set_ylabel('[Na]i (mM)')
 for k, c, d in zip(ks, cs, data):
     nas = d[2]
     na = np.array([x[0] for x in nas])
-    ax.plot(beats, na, label=f'{k} mM', color=c, zorder=99)
+    ax6.plot(beats, na, label=f'{k} mM', color=c, zorder=99)
 
-axi = ax.inset_axes([0.06, 0.23, 0.25, 0.4])
+axi = ax6.inset_axes([0.06, 0.23, 0.25, 0.4])
 axi.tick_params(labelsize='small')
 axi.set_xticklabels([])
 axi.set_yticklabels([])
@@ -204,9 +207,9 @@ axi.set_ylim(-60, 10)
 i = 90
 axi.set_xlim(i * cl, i * cl + 500)
 axi.plot(data[0][0][i], data[0][1][i], color='tab:orange')
-ax.arrow(i, 9.09, -40, -0.2, zorder=99, color='tab:orange')
+ax6.arrow(i, 9.09, -40, -0.2, zorder=99, color='tab:orange')
 
-axi = ax.inset_axes([0.50, 0.32, 0.25, 0.4])
+axi = ax6.inset_axes([0.50, 0.32, 0.25, 0.4])
 axi.tick_params(labelsize='small')
 axi.set_xticklabels([])
 axi.set_yticklabels([])
@@ -214,23 +217,25 @@ axi.set_ylim(-60, 10)
 i = 180
 axi.set_xlim(i * cl, i * cl + 500)
 axi.plot(data[0][0][i], data[0][1][i], color='tab:purple')
-ax.arrow(i + 3, 8.77, 40, 0.08, zorder=99, color='tab:purple')
+ax6.arrow(i + 3, 8.77, 40, 0.08, zorder=99, color='tab:purple')
 
 #
 # Na ions carried per beat, over time
 #
-qlim = 38000, 93000
+axl = []
+qlim = 38, 93
 sg = matplotlib.gridspec.GridSpecFromSubplotSpec(
     1, 4, subplot_spec=grid[2:, 0:4], hspace=0, wspace=0.05)
 for i, k in enumerate(ks):
     ts, aps, nais, qinas, qinabs, qinals, qinaks, qinacas = data[i]
 
     ax = fig.add_subplot(sg[0, len(ks) - 1 - i])
+    axl.append(ax)
     ax.text(n_beats // 2, 92000, f'{k} mM', horizontalalignment='center')
 
     ax.set_xlabel('Time (s)')
     if i == 3:
-        ax.set_ylabel('Na+ ions carried per beat')
+        ax.set_ylabel('Na+ carried per beat (nC)')
     else:
         ax.set_yticklabels([])
     ax.set_ylim(*qlim)
@@ -259,6 +264,8 @@ for i, k in enumerate(ks):
 
     if i == 3:
         ax.legend()
+
+fig.align_ylabels([ax1, ax5, axl[-1]])
 
 # Show / store
 path = os.path.join(fpath, fname)

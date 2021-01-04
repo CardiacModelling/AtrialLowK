@@ -36,7 +36,7 @@ for level in ks:
         sd1.append(myokit.DataLog.load_csv(path))
     else:
         print(f'File not found: {path}')
-        sd1.append(float('nan'))
+        sd1.append(None)
 
     path = os.path.join(spath, f'sd-{name}-ko-{level_str}-b-900.csv')
     if os.path.isfile(path):
@@ -44,13 +44,13 @@ for level in ks:
         sd2.append(myokit.DataLog.load_csv(path))
     else:
         print(f'File not found: {path}')
-        sd2.append(float('nan'))
+        sd2.append(None)
 
 #
 # Create figure
 #
 fig = plt.figure(figsize=(4.3, 4.5))  # One-column size
-fig.subplots_adjust(0.18, 0.100, 0.98, 0.945)
+fig.subplots_adjust(0.15, 0.100, 0.98, 0.945)
 grid = matplotlib.gridspec.GridSpec(2, 1, hspace=0.2)
 
 # Add model name
@@ -73,7 +73,8 @@ ax.set_ylabel('-1x stimulus\namplitude (A/F)')
 ax.set_xlim(0, 5)
 ax.set_ylim(0, 20)
 for k, c, d in zip(ks, cs, sd1):
-    ax.plot(d['duration'], d['amplitude'], color=c, label=f'{k} mM')
+    if d is not None:
+        ax.plot(d['duration'], d['amplitude'], color=c, label=f'{k} mM')
 #ax.text(0.96, 0.83, atext, transform=ax.transAxes, ha='right')
 ax.legend(loc='upper right')
 ax.text(0.10, 1, 'After 1 second')
@@ -85,8 +86,9 @@ ax.set_ylabel('-1x stimulus\namplitude (A/F)')
 ax.set_xlim(0, 5)
 ax.set_ylim(0, 20)
 for k, c, d in zip(ks, cs, sd2):
-    ls = '--' if k == 5.4 else '-'
-    ax.plot(d['duration'], d['amplitude'], color=c, ls=ls)
+    if d is not None:
+        ls = '--' if k == 5.4 else '-'
+        ax.plot(d['duration'], d['amplitude'], color=c, ls=ls)
 ax.text(0.10, 1, 'After 15 minutes')
 
 #
