@@ -60,7 +60,6 @@ def func(model, y, x, x2=None):
     y = model.get(y.qname())
     for s in list(model.states()):
         if s is not x and s is not x2:
-            print(s)
             shared.demote(s)
     if not x.is_state():
         x.promote(x.rhs().eval())
@@ -123,5 +122,5 @@ ax3.axvline(vm.state_value(), color='#cccccc', zorder=0)
 fname = f'{fname}-graphs'
 path = os.path.join(fpath, fname)
 print(f'Writing figure to {path}')
-plt.savefig(f'{path}.pdf')
+plt.savefig(f'{path}.svg')
 
