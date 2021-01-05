@@ -38,20 +38,20 @@ conc = {
     'chloride.Cl_i': '$[Cl^-]_i$ (mM)',
 }
 variables = {
-    'ina.INa': 'INa (A/F)',
-    'ical.ICaL': 'ICaL (A/F)',
-    'ikur.IKur': 'IKur (A/F)',
-    'ito.Ito': 'Ito (A/F)',
-    'ikr.IKr': 'IKr (A/F)',
-    'iks.IKs': 'IKs (A/F)',
+    'ina.INa': '$I_{Na}$ (A/F)',
+    'ical.ICaL': '$I_{CaL}$ (A/F)',
+    'ikur.IKur': '$I_{Kur}$ (A/F)',
+    'ito.Ito': '$I_{to}$ (A/F)',
+    'ikr.IKr': '$I_{Kr}$ (A/F)',
+    'iks.IKs': '$I_{Ks}$ (A/F)',
     'calcium.Ca_i': '$[Ca^{2+}]_i$ (μM)',
-    'inab.INaB': 'INaB (A/F)',
-    'icab.ICaB': 'ICaB (A/F)',
-    'iclb.IClB': 'IClB (A/F)',
-    'ik1.IK1': 'IK1 (A/F)',
-    'inak.INaK': 'INaK (A/F)',
-    'inaca.INaCa': 'INaCa (A/F)',
-    'ikach.IKACh': 'IKACh (A/F)',
+    'inab.INaB': '$I_{NaB}$ (A/F)',
+    'icab.ICaB': '$I_{CaB}$ (A/F)',
+    'iclb.IClB': '$I_{ClB}$ (A/F)',
+    'ik1.IK1': '$I_{K1}$ (A/F)',
+    'inak.INaK': '$I_{NaK}$ (A/F)',
+    'inaca.INaCa': '$I_{NaCa}$ (A/F)',
+    'ikach.IKACh': '$I_{KACh}$ (A/F)',
 
 }
 changed = set(['ina.INa', 'ik1.IK1', 'ikach.IKACh'])

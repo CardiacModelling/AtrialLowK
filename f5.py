@@ -127,8 +127,8 @@ fig.text(0.5, 0.980, shared.fancy_name(model), name_font)
 
 # Add panel letters
 letter_font = {'weight': 'bold', 'fontsize': 16}
-fig.text(0.003, 0.890, 'A', letter_font)
-fig.text(0.505, 0.890, 'B', letter_font)
+fig.text(0.003, 0.895, 'A', letter_font)
+fig.text(0.505, 0.895, 'B', letter_font)
 fig.text(0.003, 0.670, 'C', letter_font)
 fig.text(0.510, 0.670, 'D', letter_font)
 fig.text(0.003, 0.440, 'E', letter_font)
@@ -157,13 +157,13 @@ ax1.legend(loc=(1, 1.1), ncol=4)
 # Na availability
 #
 ax3 = fig.add_subplot(grid[0, 2])
-ax3.set_ylabel('Recovered INa')
+ax3.set_ylabel('Recovered $I_{Na}$')
 ax3.set_xlabel('V (mV)')
 ax3.set_xlim(-95, -40)
 ax3.set_ylim(-0.05, 1.05)
 ax3.plot(vs, ss, color='#999999')
 ax4 = fig.add_subplot(grid[0, 3])
-ax4.set_ylabel('Recovered INa')
+ax4.set_ylabel('Recovered $I_{Na}$')
 ax4.set_xlabel('V (mV)')
 ax4.set_xlim(-95, -40)
 ax4.set_ylim(-0.05, 1.05)
@@ -182,7 +182,7 @@ ax4.text(0.60, 0.90, text_2, transform=ax4.transAxes)
 #
 ax5 = fig.add_subplot(grid[1, :2])
 ax5.set_xlabel('Time (s)')
-ax5.set_ylabel('Vr (mV)')
+ax5.set_ylabel('$V_r$ (mV)')
 for k, c, d in zip(ks, cs, data):
     aps = d[1]
     vr = np.array([x[0] for x in aps])
@@ -193,7 +193,7 @@ for k, c, d in zip(ks, cs, data):
 #
 ax6 = fig.add_subplot(grid[1, 2:])
 ax6.set_xlabel('Time (s)')
-ax6.set_ylabel('[Na]i (mM)')
+ax6.set_ylabel('$[Na^+]_i$ (mM)')
 for k, c, d in zip(ks, cs, data):
     nas = d[2]
     na = np.array([x[0] for x in nas])
@@ -209,7 +209,7 @@ axi.set_xlim(i * cl, i * cl + 500)
 axi.plot(data[0][0][i], data[0][1][i], color='tab:orange')
 ax6.arrow(i, 9.09, -40, -0.2, zorder=99, color='tab:orange')
 
-axi = ax6.inset_axes([0.50, 0.32, 0.25, 0.4])
+axi = ax6.inset_axes([0.54, 0.23, 0.25, 0.4])
 axi.tick_params(labelsize='small')
 axi.set_xticklabels([])
 axi.set_yticklabels([])
@@ -217,7 +217,7 @@ axi.set_ylim(-60, 10)
 i = 180
 axi.set_xlim(i * cl, i * cl + 500)
 axi.plot(data[0][0][i], data[0][1][i], color='tab:purple')
-ax6.arrow(i + 3, 8.77, 40, 0.08, zorder=99, color='tab:purple')
+ax6.arrow(i + 6, 8.77, 54, 0.08, zorder=99, color='tab:purple')
 
 #
 # Na ions carried per beat, over time
@@ -231,11 +231,11 @@ for i, k in enumerate(ks):
 
     ax = fig.add_subplot(sg[0, len(ks) - 1 - i])
     axl.append(ax)
-    ax.text(n_beats // 2, 92000, f'{k} mM', horizontalalignment='center')
+    ax.text(n_beats // 2, 91, f'{k} mM', horizontalalignment='center')
 
     ax.set_xlabel('Time (s)')
     if i == 3:
-        ax.set_ylabel('Na+ carried per beat (nC)')
+        ax.set_ylabel('$Na^+$ carried per beat (nC)')
     else:
         ax.set_yticklabels([])
     ax.set_ylim(*qlim)
@@ -246,21 +246,21 @@ for i, k in enumerate(ks):
     qinals1 = -1 * np.array([x[-1] for x in qinals])
 
     cmap = matplotlib.cm.get_cmap('tab10')
-    ax.plot(beats, qinaks1, label='INaK', color=cmap(0))
+    ax.plot(beats, qinaks1, label='$I_{NaK}$', color=cmap(0))
 
     out = qinacas1
     ax.fill_between(beats, out * 0, out, color=cmap(1), alpha=0.1)
-    ax.plot(beats, out, label='INaCa', color=cmap(1))
+    ax.plot(beats, out, label='$I_{NaCa}$', color=cmap(1))
 
     plus = out + qinabs1
     ax.fill_between(beats, out, plus, color=cmap(2), alpha=0.1)
     out = plus
-    ax.plot(beats, out, label='... + INaB', color=cmap(2))
+    ax.plot(beats, out, label='... + $I_{NaB}$', color=cmap(2))
 
     plus = out + qinas1
     ax.fill_between(beats, out, plus, color=cmap(3), alpha=0.1)
     out = plus
-    ax.plot(beats, out, label='... + INa', color=cmap(3))
+    ax.plot(beats, out, label='... + $I_{Na}$', color=cmap(3))
 
     if i == 3:
         ax.legend()

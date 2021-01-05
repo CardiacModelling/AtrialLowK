@@ -17,6 +17,7 @@ matplotlib.rcParams['axes.spines.right'] = False
 matplotlib.rcParams['axes.spines.top'] = False
 #matplotlib.rcParams['xtick.minor.visible'] = True
 #matplotlib.rcParams['ytick.minor.visible'] = True
+matplotlib.rcParams['mathtext.default'] = 'regular'
 
 # Extracellular Potassium concentrations
 ko_levels = [2.5, 3.2, 4, 5.4]

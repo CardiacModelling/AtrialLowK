@@ -160,7 +160,7 @@ for ax in axes:
 for ax in axes[1:]:
     ax.set_yticklabels('')
     #ax.tick_params(axis='y', which='both', direction='in')
-axes[0].set_ylabel('R (MOhm)')
+axes[0].set_ylabel('R (M$\Omega$)')
 
 # For each concentration...
 for ax, rtr, c, tx in zip(axes, rm, cs, txs):

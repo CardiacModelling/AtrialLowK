@@ -162,7 +162,7 @@ def ik1_iv(ax, model, protocol, levels, vrests):
 
 ax = fig.add_subplot(grid[1, 0])
 ax.set_xlabel('V (mV)')
-ax.set_ylabel('IK1 (A/F)')
+ax.set_ylabel('$I_{K1}$ (A/F)')
 ax.set_xlim(-112, -32)
 ax.set_ylim(-0.8, 1.3)
 ik1_iv(ax, model2, protocol, ks, vr2)
@@ -170,7 +170,7 @@ ax.text(0.65, 0.05, 'After 1 second', transform=ax.transAxes)
 
 ax = fig.add_subplot(grid[1, 1])
 ax.set_xlabel('V (mV)')
-ax.set_ylabel('IK1 (A/F)')
+ax.set_ylabel('$I_{K1}$ (A/F)')
 ax.set_xlim(-112, -32)
 ax.set_ylim(-0.4, 0.4)
 ik1_iv(ax, model1, protocol, ks, vr1)
@@ -184,7 +184,7 @@ coords = [
 ]
 for k, c in zip(ks, coords):
     ax.annotate(
-        f'Vr({k})', xy=c[0], xytext=c[1], textcoords='data',
+        f'$V_r({k})$', xy=c[0], xytext=c[1], textcoords='data',
         arrowprops=dict(arrowstyle='->', connectionstyle='arc3'))
 
 
@@ -236,7 +236,7 @@ def inak(ax, model, protocol, levels, colors):
 
 ax = fig.add_subplot(grid[2, 0])
 ax.set_xlabel('V (mV)')
-ax.set_ylabel('INaK (A/F)')
+ax.set_ylabel('$I_{NaK}$ (A/F)')
 ax.set_xlim(-102, 22)
 ax.set_ylim(0.00, 0.36)
 inak(ax, model2, protocol, ks, cs)
@@ -244,7 +244,7 @@ ax.text(0.65, 0.05, 'After 1 second', transform=ax.transAxes)
 
 ax = fig.add_subplot(grid[2, 1])
 ax.set_xlabel('V (mV)')
-ax.set_ylabel('INaK (A/F)')
+ax.set_ylabel('$I_{NaK}$ (A/F)')
 ax.set_xlim(-102, 22)
 ax.set_ylim(0.00, 0.36)
 inak(ax, model1, protocol, ks, cs)

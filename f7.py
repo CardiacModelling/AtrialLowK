@@ -158,7 +158,7 @@ def summary(ax1, ax2, ax3, ax4, ax5, data):
 
     # Vr
     ax = ax1
-    ax.set_ylabel('Vr (mV)')
+    ax.set_ylabel('$V_r$ (mV)')
     ax.set_xlim(*xlim)
     ax.set_ylim(-78, -49)
     ax.set_xticks(shared.ko_levels)
@@ -205,7 +205,7 @@ def summary(ax1, ax2, ax3, ax4, ax5, data):
 
     # WL
     ax = ax5
-    ax.set_xlabel('External potassium concentration')
+    ax.set_xlabel('External potassium concentration $[K^+]_o$')
     ax.set_ylabel('WL (mm)')
     ax.set_xlim(*xlim)
     ax.set_ylim(160, 400)

@@ -185,19 +185,19 @@ ax.set_xlim(*vlim)
 ax.set_ylim(-0.10, 0.30)
 ax.axhline(0, color='#bbbbbb')
 for k, xy, qr, c in zip(ks, ik1_v1, vrs1, cs):
-    label = 'IK1' if k == 5.4 else None
+    label = '$I_{K1}$' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, label=label)
     ax.plot(qr[0], qr[1], 'o', color=c, fillstyle='none')
     ax.plot(qr[0], qr[2], 'o', color=c, fillstyle='none')
     ax.axvline(qr[0], color=c, lw=0.7, alpha=0.8, zorder=1)
 ax.annotate(
-    'Vrest',
+    '$V_r$',
     xy=(vrs1[0][0], vrs1[0][2] - 0.01),
     xytext=(vrs1[0][0] + 3, -0.04),
     textcoords='data',
     arrowprops=dict(arrowstyle='->', connectionstyle='arc3'))
 for k, xy, c in zip(ks, inak_v1, cs):
-    label = 'INaK' if k == 5.4 else None
+    label = '$I_{NaK}$' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, ls='--', label=label)
 ax.text(0.05, 0.95, 'After 1 second', transform=ax.transAxes,
         bbox=dict(boxstyle='square', ec='#ffffff', fc='#ffffff'))
@@ -209,12 +209,12 @@ ax = fig.add_subplot(grid[2:, 2:])
 ax.minorticks_on()
 ax.tick_params(axis='y', which='minor', left=False)
 ax.set_xlabel('V (mV)')
-ax.set_ylabel('IK1 (A/F)')
+ax.set_ylabel('I (A/F)')
 ax.set_xlim(*vlim)
 ax.set_ylim(-0.10, 0.30)
 ax.axhline(0, color='#bbbbbb')
 for k, xy, qr, c in zip(ks, ik1_v2, vrs2, cs):
-    label = 'IK1' if k == 5.4 else None
+    label = '$I_{K1}$' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, label=label)
     ax.plot(qr[0], qr[1], 'o', color=c, fillstyle='none')
     ax.plot(qr[0], qr[2], 'o', color=c, fillstyle='none')
@@ -222,7 +222,7 @@ for k, xy, qr, c in zip(ks, ik1_v2, vrs2, cs):
 ax.text(0.05, 0.95, 'After 15 minutes', transform=ax.transAxes,
         bbox=dict(boxstyle='square', ec='#ffffff', fc='#ffffff'))
 for k, xy, c in zip(ks, inak_v2, cs):
-    label = 'INaK' if k == 5.4 else None
+    label = '$I_{NaK}$' if k == 5.4 else None
     ax.plot(xy[0], xy[1], color=c, ls='--', label=label)
 ax.legend(ncol=2, loc='lower right')
 #ax.grid(True)
