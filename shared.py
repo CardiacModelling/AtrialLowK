@@ -637,18 +637,18 @@ def fancy_name(model):
     """Returns a nicer name for a model."""
     name = model.name()
     if name == 'grandi-2011':
-        return 'Grandi, Pandit & Voigt et al. 2011'
+        return 'Grandi-Pandit-Voigt et al., 2011'
     if 'courtemanche' in name:
-        return 'Courtemanche et al. 1998'
+        return 'Courtemanche et al., 1998'
     if 'koivumaki' in name:
-        return 'Koivumaki et al. 2011'
+        return 'Koivumaki et al., 2011'
     if 'maleckar' in name:
-        return 'Maleckar et al. 2008'
+        return 'Maleckar et al., 2008'
     if 'ni' in name:
-        return 'Ni et al. 2017'
+        return 'Ni et al., 2017'
     if 'nygren' in name:
-        return 'Nygren et al. 1998'
+        return 'Nygren et al., 1998'
     if 'voigt' in name:
-        return 'Voigt & Heijman et al. 2013'
+        return 'Voigt-Heijman et al., 2013'
     raise NotImplementedError('Unknown model: ' + str(name))
 

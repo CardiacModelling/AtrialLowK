@@ -156,13 +156,13 @@ ax1.legend(loc=(1, 1.1), ncol=4)
 #
 # Na availability
 #
-ax3 = fig.add_subplot(grid[0, 2])
+ax3 = fig.add_subplot(grid[1, 0])
 ax3.set_ylabel('Recovered $I_{Na}$')
 ax3.set_xlabel('V (mV)')
 ax3.set_xlim(-95, -40)
 ax3.set_ylim(-0.05, 1.05)
 ax3.plot(vs, ss, color='#999999')
-ax4 = fig.add_subplot(grid[0, 3])
+ax4 = fig.add_subplot(grid[1, 1])
 ax4.set_ylabel('Recovered $I_{Na}$')
 ax4.set_xlabel('V (mV)')
 ax4.set_xlim(-95, -40)
@@ -180,7 +180,7 @@ ax4.text(0.60, 0.90, text_2, transform=ax4.transAxes)
 #
 # Vr
 #
-ax5 = fig.add_subplot(grid[1, :2])
+ax5 = fig.add_subplot(grid[0, 2:])
 ax5.set_xlabel('Time (s)')
 ax5.set_ylabel('$V_r$ (mV)')
 for k, c, d in zip(ks, cs, data):
