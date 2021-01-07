@@ -154,44 +154,9 @@ ax2.text(0.60, 0.90, text_2, transform=ax2.transAxes)
 ax1.legend(loc=(1, 1.1), ncol=4)
 
 #
-# Na availability
-#
-ax3 = fig.add_subplot(grid[1, 0])
-ax3.set_ylabel('Recovered $I_{Na}$')
-ax3.set_xlabel('V (mV)')
-ax3.set_xlim(-95, -40)
-ax3.set_ylim(-0.05, 1.05)
-ax3.plot(vs, ss, color='#999999')
-ax4 = fig.add_subplot(grid[1, 1])
-ax4.set_ylabel('Recovered $I_{Na}$')
-ax4.set_xlabel('V (mV)')
-ax4.set_xlim(-95, -40)
-ax4.set_ylim(-0.05, 1.05)
-ax4.plot(vs, ss, color='#999999')
-for k, c, d in zip(ks, cs, data):
-    aps = d[1]
-    vr1 = aps[1][0]
-    vr2 = aps[-1][0]
-    ax3.plot([vr1], [f(vr1)], 'o', markersize=8, fillstyle='none', color=c)
-    ax4.plot([vr2], [f(vr2)], 'o', markersize=8, fillstyle='none', color=c)
-ax3.text(0.60, 0.90, text_1, transform=ax3.transAxes)
-ax4.text(0.60, 0.90, text_2, transform=ax4.transAxes)
-
-#
-# Vr
-#
-ax5 = fig.add_subplot(grid[0, 2:])
-ax5.set_xlabel('Time (s)')
-ax5.set_ylabel('$V_r$ (mV)')
-for k, c, d in zip(ks, cs, data):
-    aps = d[1]
-    vr = np.array([x[0] for x in aps])
-    ax5.plot(beats, vr, label=f'{k} mM', color=c)
-
-#
 # [Na]i
 #
-ax6 = fig.add_subplot(grid[1, 2:])
+ax6 = fig.add_subplot(grid[0, 2:])
 ax6.set_xlabel('Time (s)')
 ax6.set_ylabel('$[Na^+]_i$ (mM)')
 for k, c, d in zip(ks, cs, data):
@@ -218,6 +183,42 @@ i = 180
 axi.set_xlim(i * cl, i * cl + 500)
 axi.plot(data[0][0][i], data[0][1][i], color='tab:purple')
 ax6.arrow(i + 6, 8.77, 54, 0.08, zorder=99, color='tab:purple')
+
+#
+# Na availability
+#
+ax3 = fig.add_subplot(grid[1, 0])
+ax3.set_ylabel('Recovered $I_{Na}$')
+ax3.set_xlabel('V (mV)')
+ax3.set_xlim(-95, -40)
+ax3.set_ylim(-0.05, 1.05)
+ax3.plot(vs, ss, color='#999999')
+ax4 = fig.add_subplot(grid[1, 1])
+ax4.set_ylabel('Recovered $I_{Na}$')
+ax4.set_xlabel('V (mV)')
+ax4.set_xlim(-95, -40)
+ax4.set_ylim(-0.05, 1.05)
+ax4.plot(vs, ss, color='#999999')
+for k, c, d in zip(ks, cs, data):
+    aps = d[1]
+    vr1 = aps[1][0]
+    vr2 = aps[-1][0]
+    ax3.plot([vr1], [f(vr1)], 'o', markersize=8, fillstyle='none', color=c)
+    ax4.plot([vr2], [f(vr2)], 'o', markersize=8, fillstyle='none', color=c)
+ax3.text(0.60, 0.90, text_1, transform=ax3.transAxes)
+ax4.text(0.60, 0.90, text_2, transform=ax4.transAxes)
+
+#
+# Vr
+#
+ax5 = fig.add_subplot(grid[1, 2:])
+ax5.set_xlabel('Time (s)')
+ax5.set_ylabel('$V_r$ (mV)')
+for k, c, d in zip(ks, cs, data):
+    aps = d[1]
+    vr = np.array([x[0] for x in aps])
+    ax5.plot(beats, vr, label=f'{k} mM', color=c)
+
 
 #
 # Na ions carried per beat, over time
