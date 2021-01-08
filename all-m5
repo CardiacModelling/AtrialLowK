@@ -1,0 +1,16 @@
+#/usr/bin/env bash
+python3 m5-sd.py courtemanche
+python3 m5-sd.py grandi
+python3 m5-sd.py koivumaki
+python3 m5-sd.py maleckar
+python3 m5-sd.py ni
+python3 m5-sd.py nygren
+python3 m5-sd.py voigt
+
+python3 m5-sd.py courtemanche long
+python3 m5-sd.py grandi long
+python3 m5-sd.py koivumaki long
+python3 m5-sd.py maleckar long
+python3 m5-sd.py ni long
+python3 m5-sd.py nygren long
+python3 m5-sd.py voigt long

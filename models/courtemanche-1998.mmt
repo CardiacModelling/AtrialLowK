@@ -1,0 +1,460 @@
+[[model]]
+name: courtemanche-1998
+desc: """
+Model of the human atrial action potential by Courtemanche et al. [1].
+
+Adapted from the CellML implementation by Penny Noble.
+
+The stimulus was set to 0.5[ms] and approximately twice the threshold value for
+depolarisation.
+
+To ensure [K]i stabilised, the stimulus current was added to the equation for
+[K]i.
+
+[1] Ionic mechanisms underlying human atrial action potential properties:
+    insights from a mathematical model.
+    Marc Courtemanche, Rafael J. Ramirez and Stanley Nattel.
+    1998, American Journal of Physiology, 275, H301-H321.
+    https://doi.org/10.1152/ajpheart.1998.275.1.H301
+
+"""
+# Initial values
+membrane.V = -8.19463303822041098e+01
+ina.m      =  2.56385228666526068e-03
+ina.h      =  9.70298907063270155e-01
+ina.j      =  9.81123905023234988e-01
+ito.oa     =  2.91755626557170314e-02
+ito.oi     =  9.99342865333055497e-01
+ikur.ua    =  4.58838038240151104e-03
+ikur.ui    =  9.91468962753066063e-01
+ikr.xr     =  8.33819909884048389e-04
+iks.xs     =  1.86683180787284714e-02
+ical.d     =  1.24231529593716656e-04
+ical.f     =  9.51907788168154578e-01
+ical.f_Ca  =  7.39682838459564729e-01
+cajsr.u    = -1.97647749727073971e-40
+cajsr.v    = 1.0
+cajsr.w    =  9.99233799248152699e-01
+ion.Na_i   =  1.38169746305367962e+01
+ion.K_i    =  1.36355229902154434e+02
+ion.Ca_i   =  1.23092247890489894e-04
+ion.Ca_up  =  1.54668119199095355e+00
+ion.Ca_rel =  1.07650740580354909e+00
+
+
+#
+# Membrane potential
+#
+# Page H317
+#
+[membrane]
+dot(V) = -(i_ion + i_diff + stimulus.i_stim) / phys.Cm
+    in [mV]
+    label membrane_potential
+i_ion = (
+    ina.i_Na
+    + ik1.i_K1
+    + ito.i_to
+    + ikur.i_Kur
+    + ikr.i_Kr
+    + iks.i_Ks
+    + ib.i_B_Na
+    + ib.i_B_Ca
+    + inak.i_NaK
+    + ipca.i_PCa
+    + inaca.i_NaCa
+    + ical.i_Ca_L
+)
+    in [pA]
+    label cellular_current
+i_diff = 0 [pA]
+    in [pA]
+    bind diffusion_current
+
+#
+# Stimulus current
+#
+[stimulus]
+i_stim = engine.pace * amplitude
+    in [pA]
+    label stimulus_current
+amplitude = 2 * -4618 [pA]
+    in [pA]
+    desc: """
+        Under baseline conditions, at 1Hz with a 0.5ms stimulus, -4618 pA is
+        approximately the smallest value that triggers three successive APs.
+        """
+
+#
+# Simulation variables
+#
+[engine]
+time = 0 [ms]
+    in [ms]
+    bind time
+pace = 0
+    bind pace
+
+#
+# Physical constants
+#
+# Page H303
+#
+[phys]
+Cm = 100 [pF]
+    in [pF]
+    label membrane_capacitance
+F = 96.4867 [C/mmol]
+R = 8.3143 [J/mol/K]
+T = 310 [K]
+FRT = F / R / T
+
+#
+# Calcium buffers
+#
+# Page H319
+#
+[ca_buffers]
+CMDN_max = 0.05 [mM]
+CSQN_max = 10 [mM]
+Ca_CMDN = CMDN_max * ion.Ca_i / (ion.Ca_i + Km_CMDN)
+    in [mM]
+Ca_CSQN = CSQN_max * ion.Ca_rel / (ion.Ca_rel + Km_CSQN)
+    in [mM]
+Ca_TRPN = TRPN_max * ion.Ca_i / (ion.Ca_i + Km_TRPN)
+    in [mM]
+Km_CMDN = 0.00238 [mM]
+Km_CSQN = 0.8 [mM]
+Km_TRPN = 0.0005 [mM]
+TRPN_max = 0.07 [mM]
+
+#
+# Calcium leak and uptake in the NSR
+#
+# Page H319
+#
+[cansr]
+Ca_up_max = 15 [mM]
+i_up_leak = I_up_max * ion.Ca_up / Ca_up_max
+    in [mM/ms]
+I_up_max = 0.005 [mM/ms]
+K_up = 0.00092 [mM]
+i_up = I_up_max / (1 + K_up / ion.Ca_i)
+    in [mM/ms]
+
+#
+# Calcium release from the JSR
+#
+# Page H319
+#
+[cajsr]
+use membrane.V
+Fn = 1000 * (1e-15 * cell.V_rel * i_rel - 1e-15 / (2 * phys.F) * (0.5 * ical.i_Ca_L - 0.2 * inaca.i_NaCa))
+K_rel = 30 [mS/uF]
+i_rel = K_rel * u ^ 2 * v * w * (ion.Ca_rel - ion.Ca_i)
+    in [mM/ms]
+dot(u) = (inf - u) / tau
+    inf = (1 + exp(-(cajsr.Fn -  3.4175e-13) / 1.367e-15)) ^ (-1)
+    tau = 8
+dot(v) = (inf - v) / tau
+    inf = 1 - (1 + exp(-(cajsr.Fn - 6.835e-14) / 1.367e-15)) ^ (-1)
+    tau = 1.91 + 2.09 * (1 + exp(-(cajsr.Fn -  3.4175e-13) / 1.367e-15)) ^ (-1)
+dot(w) = (inf - w) / tau
+    tau = if(abs(V - 7.9) < 1e-10 , 6 * 0.2 / 1.3, 6 * (1 - exp(-(V - 7.9) / 5)) / ((1 + 0.3 * exp(-(V - 7.9) / 5)) * 1 * (V - 7.9)))
+    inf = 1 - (1 + exp(-(V - 40) / 17)) ^ (-1)
+
+#
+# L-type Calcium current
+#
+#  Page H319
+#
+[ical]
+use membrane.V
+dot(d) = (inf - d) / tau
+    inf = (1 + exp((V + 10) / -8)) ^ (-1)
+    tau = piecewise(abs(V + 10) < 1e-10 , 4.579 / (1 + exp((V + 10) / -6.24)), (1 - exp((V + 10) / -6.24)) / (0.035 * (V + 10) * (1 + exp((V + 10) / -6.24))))
+dot(f) = (inf - f) / tau
+    inf = exp(-(V + 28) / 6.9) / (1 + exp(-(V + 28) / 6.9))
+    tau = 9 * (0.0197 * exp(-0.0337 ^ 2 * (V + 10) ^ 2) + 0.02) ^ (-1)
+dot(f_Ca) = (inf - f_Ca) / tau
+    inf = 1 / (1 + ion.Ca_i / 0.00035)
+    tau = 2 [ms]
+scaling = 1
+    label I_CaL_scaling
+g_Ca_L = 0.12375 [mS/uF]
+i_Ca_L = scaling * phys.Cm * g_Ca_L * d * f * f_Ca * (V - 65)
+    in [pA]
+    label I_CaL
+
+#
+# Sodium-Calcium exchanger current
+#
+# Page H319
+#
+[inaca]
+use membrane.V, phys.FRT
+i_NaCa = phys.Cm * I_NaCa_max * (exp(gamma * V * FRT) * ion.Na_i ^ 3 * extra.Ca_o - exp((gamma - 1) * V * FRT) * extra.Na_o ^ 3 * ion.Ca_i) / ((K_mNa ^ 3 + extra.Na_o ^ 3) * (K_mCa + extra.Ca_o) * (1 + K_sat * exp((gamma - 1) * V * FRT)))
+    in [pA]
+    label I_NaCa
+I_NaCa_max = 1600 [A/F]
+K_mCa = 1.38 [mM]
+K_mNa = 87.5 [mM]
+K_sat = 0.1
+gamma = 0.35
+
+#
+# Background currents
+#
+# Page H319
+#
+[ib]
+use membrane.V
+E_Ca = phys.R * phys.T / (2 * phys.F) * log(extra.Ca_o / ion.Ca_i)
+    in [mV]
+g_B_Ca = 0.001131 [mS/uF]
+g_B_K = 0 [mS/uF]
+g_B_Na =  6.744375e-4 [mS/uF]
+i_B_Ca = phys.Cm * g_B_Ca * (V - E_Ca)
+    in [pA]
+i_B_K = phys.Cm * g_B_K * (V - ik1.E_K)
+    in [pA]
+i_B_Na = phys.Cm * g_B_Na * (V - ina.E_Na)
+    in [pA]
+
+#
+# Fast sodium current
+#
+# Page H317
+#
+[ina]
+use membrane.V
+i_Na = phys.Cm * g_Na * m ^ 3 * h * j * (V - E_Na)
+    in [pA]
+    label I_Na
+E_Na = phys.R * phys.T / phys.F * log(extra.Na_o / ion.Na_i)
+    in [mV]
+g_Na = 7.8 [mS/uF]
+dot(m) = (inf - m) / tau
+    label ina_m
+    alpha = if(V == -47.13 , 3.2 , 0.32 * (V + 47.13) / (1 - exp(-0.1 * (V + 47.13))))
+    beta = 0.08 * exp(-V / 11)
+    inf = alpha / (alpha + beta)
+    tau = 1 / (alpha + beta)
+dot(h) = (inf - h) / tau
+    alpha = if(V < -40 , 0.135 * exp((V + 80) / -6.8), 0)
+    beta = if(V < -40 , 3.56 * exp(0.079 * V) + 310000 * exp(0.35 * V), 1 / (0.13 * (1 + exp((V + 10.66) / -11.1))))
+    inf = alpha / (alpha + beta)
+        label ina_h_inf
+    tau = 1 / (alpha + beta)
+dot(j) = (inf - j) / tau
+    alpha = if(V < -40 , (-127140 * exp(0.2444 * V) - 3.474e-5 * exp(-0.04391 * V)) * (V + 37.78) / (1 + exp(0.311 * (V + 79.23))), 0)
+    beta = if(V < -40 , 0.1212 * exp(-0.01052 * V) / (1 + exp(-0.1378 * (V + 40.14))), 0.3 * exp(-2.535e-7 * V) / (1 + exp(-0.1 * (V + 32))))
+    inf = alpha / (alpha + beta)
+        label ina_j_inf
+    tau = 1 / (alpha + beta)
+
+#
+# Intracellular ionic concentrations
+#
+# Page H317
+#
+[ion]
+dot(Ca_i) = B1 / B2
+    in [mM]
+    B1 = (2 * inaca.i_NaCa - (ipca.i_PCa + ical.i_Ca_L + ib.i_B_Ca)) / (2 * cell.V_i * phys.F) + (cell.V_up * (cansr.i_up_leak - cansr.i_up) + cajsr.i_rel * cell.V_rel) / cell.V_i
+        in [mM/ms]
+    B2 = 1 + ca_buffers.TRPN_max * ca_buffers.Km_TRPN / (Ca_i + ca_buffers.Km_TRPN) ^ 2 + ca_buffers.CMDN_max * ca_buffers.Km_CMDN / (Ca_i + ca_buffers.Km_CMDN) ^ 2
+    label Ca_i
+dot(Ca_rel) = (itr.i_tr - cajsr.i_rel) * (1 + ca_buffers.CSQN_max * ca_buffers.Km_CSQN / (Ca_rel + ca_buffers.Km_CSQN) ^ 2) ^ (-1)
+    in [mM]
+dot(Ca_up) = cansr.i_up - (cansr.i_up_leak + itr.i_tr * cell.V_rel / cell.V_up)
+    in [mM]
+dot(K_i) = (2 * inak.i_NaK - (ik1.i_K1 + ito.i_to + ikur.i_Kur + ikr.i_Kr + iks.i_Ks + ib.i_B_K + stimulus.i_stim)) / (cell.V_i * phys.F)
+    in [mM]
+    label K_i
+dot(Na_i) = (-3 * inak.i_NaK - (3 * inaca.i_NaCa + ib.i_B_Na + ina.i_Na)) / (cell.V_i * phys.F)
+    in [mM]
+    label Na_i
+
+#
+# Cell dimensions
+#
+# Page H303
+#
+[cell]
+V_cell = 20100 [um^3]
+V_i = V_cell * 0.68
+    in [um^3]
+V_rel = 0.0048 * V_cell
+    in [um^3]
+V_up = 0.0552 * V_cell
+    in [um^3]
+
+
+#
+# Rapid delayed rectifier potassium current
+#
+# Page H318
+#
+[ikr]
+use membrane.V
+g_Kr =  2.9411765e-2
+    in [mS/uF]
+i_Kr = phys.Cm * g_Kr * xr * (V - ik1.E_K) / (1 + exp((V + 15) / 22.4))
+    in [pA]
+    label I_Kr
+dot(xr) = (inf - xr) / tau
+    inf = (1 + exp((V + 14.1) / -6.5)) ^ (-1)
+    tau = (alpha + beta) ^ (-1)
+        alpha = if(abs(V + 14.1) < 1e-10 , 0.0015 , 0.0003 * (V + 14.1) / (1 - exp((V + 14.1) / -5)))
+        beta = if(abs(V - 3.3328) < 1e-10 ,  3.7836118e-4 ,  7.3898e-5 * (V - 3.3328) / (exp((V - 3.3328) / 5.1237) - 1))
+
+#
+# Sarcolemmal calcium pump current
+#
+# Page H319
+#
+[ipca]
+i_PCa = phys.Cm * i_PCa_max * ion.Ca_i / (0.0005 + ion.Ca_i)
+    in [pA]
+i_PCa_max = 0.275
+    in [A/F]
+
+#
+# Slow delayed rectifier potassium current
+#
+# Page H318
+#
+[iks]
+use membrane.V
+g_Ks =  1.2941176e-1
+    in [mS/uF]
+i_Ks = phys.Cm * g_Ks * xs ^ 2 * (V - ik1.E_K)
+    in [pA]
+dot(xs) = (inf - xs) / tau
+    inf = (1 + exp((V - 19.9) / -12.7)) ^ (-0.5)
+    tau = 0.5 * (alpha + beta) ^ (-1)
+        alpha = if(abs(V - 19.9) < 1e-10 , 0.00068 , 4e-5 * (V - 19.9) / (1 - exp((V - 19.9) / -17)))
+        beta = if(abs(V - 19.9) < 1e-10 , 0.000315 , 3.5e-5 * (V - 19.9) / (exp((V - 19.9) / 9) - 1))
+
+#
+# Sodium potassium pump
+#
+# Page H319
+#
+[inak]
+use membrane.V, phys.Cm
+use ion.Na_i, extra.K_o
+sigma = (exp(extra.Na_o / 67.3) - 1) / 7
+f_NaK = 1 / (1 + 0.1245 * exp(-0.1 * V * phys.FRT) + 0.0365 * sigma * exp(-V * phys.FRT))
+Km_K_o = 1.5 [mM]
+Km_Na_i = 10 [mM]
+I_bar = 5.9933874e-1
+    in [A/F]
+i_NaK = Cm * I_bar * f_NaK * K_o / (K_o + Km_K_o) / (1 + (Km_Na_i / Na_i) ^ 1.5)
+    in [pA]
+    label I_NaK
+
+#
+# External ionic concentrations
+#
+# Page H303
+#
+[extra]
+Ca_o = 1.8 [mM]
+K_o = 5.4 [mM]
+    in [mM]
+    label K_o
+Na_o = 140 [mM]
+
+#
+# Time independent potassium current
+#
+# Page H318
+#
+[ik1]
+use membrane.V
+E_K = phys.R * phys.T / phys.F * log(extra.K_o / ion.K_i)
+    in [mV]
+g_K1 = 0.09 [mS/uF]
+i_K1 = phys.Cm * g_K1 * (V - E_K) / (1 + exp(0.07 * (V + 80)))
+    in [pA]
+    label I_K1
+
+#
+# Transfer current from NSR to JSR
+#
+# Page H319
+#
+[itr]
+i_tr = (ion.Ca_up - ion.Ca_rel) / tau_tr
+    in [mM/ms]
+tau_tr = 180 [ms]
+
+#
+# Transient outward potassium current
+#
+# Page H318
+#
+[ito]
+use membrane.V
+dot(oa) = (inf - oa) / tau
+    alpha = 0.65 * (exp((V - -10) / -8.5) + exp((V - -10 - 40) / -59)) ^ (-1)
+    beta = 0.65 * (2.5 + exp((V - -10 + 72) / 17)) ^ (-1)
+    inf = (1 + exp((V - -10 + 10.47) / -17.54)) ^ (-1)
+    tau = (alpha + beta) ^ (-1) / ito.K_Q10
+dot(oi) = (inf - oi) / tau
+    alpha = (18.53 + 1 * exp((V - -10 + 103.7) / 10.95)) ^ (-1)
+    beta = (35.56 + 1 * exp((V - -10 - 8.74) / -7.44)) ^ (-1)
+    inf = (1 + exp((V - -10 + 33.1) / 5.3)) ^ (-1)
+    tau = (alpha + beta) ^ (-1) / ito.K_Q10
+K_Q10 = 3
+g_to = 0.1652 [mS/uF]
+i_to = phys.Cm * g_to * oa ^ 3 * oi * (V - ik1.E_K)
+    in [pA]
+    label I_to
+
+#
+# Ultrarapid delayed rectifier potassium current
+#
+# Page H318
+#
+[ikur]
+use membrane.V
+dot(ua) = (inf - ua) / tau
+    alpha = 0.65 * (exp((V - -10) / -8.5) + exp((V - -10 - 40) / -59)) ^ (-1)
+    beta = 0.65 * (2.5 + exp((V - -10 + 72) / 17)) ^ (-1)
+    tau = (alpha + beta) ^ (-1) / ito.K_Q10
+    inf = (1 + exp((V - -10 + 20.3) / -9.6)) ^ (-1)
+dot(ui) = (inf - ui) / tau
+    inf = (1 + exp((V - -10 - 109.45) / 27.48)) ^ (-1)
+    tau = (alpha + beta) ^ (-1) / ito.K_Q10
+        alpha = (21 + 1 * exp((V - -10 - 195) / -28)) ^ (-1)
+        beta = 1 / exp((V - -10 - 168) / -16)
+g_Kur = 0.005 + 0.05 / (1 + exp((V - 15) / -13))
+    in [mS/uF]
+i_Kur = phys.Cm * g_Kur * ua ^ 3 * ui * (V - ik1.E_K)
+    in [pA]
+    label I_Kur
+
+[[protocol]]
+# Level  Start    Length   Period   Multiplier
+1.0      50       0.5      1000     0
+
+[[script]]
+import matplotlib.pyplot as plt
+import myokit
+
+# Get model and protocol, create simulation
+m = get_model()
+p = get_protocol()
+s = myokit.Simulation(m, p)
+
+# Run simulation
+d = s.run(3000)
+
+# Display the results
+plt.figure()
+plt.plot(d['engine.time'], d['membrane.V'])
+plt.show()
+

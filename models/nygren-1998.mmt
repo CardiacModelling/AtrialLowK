@@ -1,0 +1,407 @@
+[[model]]
+name: nygren-1998
+desc: """
+Model of the human atrial cell by Nygren et al. [1].
+
+Adapted from the CellML implementation by Catherine Lloyd.
+
+The stimulus was set to 0.5[ms] and approximately twice the threshold value for
+depolarisation.
+
+Two measures were taken to stabilise the long-term behaviour of this model, as
+suggested in [2]:
+
+    - The parameter phi_Na_en was set to zero
+    - The stimulus current was added to the equation for K_i
+
+[1] Mathematical Model of an Adult Human Atrial Cell: The Role of K+ Currents
+    in Repolarization.
+    A. Nygren, C. Fiset, L. Firek, J.W. Clark, D.S. Lindblad, R.B. Clark and
+    W.R. Giles.
+    1998, Circulation Research, 82, 63-81.
+    https://doi.org/10.1161/01.RES.82.1.63
+
+[2] Jacquemet (2007) Steady-state solutions in mathematical models of atrial
+    cell electrophysiology and their stability.
+    2007, Mathematical Biosciences 208, 241–269.
+    https://doi.org/10.1016/j.mbs.2006.10.007
+
+"""
+# Initial values
+membrane.V      = -7.26771499383132635e+01
+ina.m           =  3.87633676556560589e-03
+ina.h1          =  8.46627323443430391e-01
+ina.h2          =  8.40040725535278088e-01
+ical.d          =  1.70638315876908684e-05
+ical.f1         =  9.98301010553781953e-01
+ical.f2         =  9.98258917383494038e-01
+it.r            =  1.23206114490715659e-03
+it.s            =  9.41107906631992619e-01
+isus.r          =  1.94215334451197663e-04
+isus.s          =  9.90779826387994222e-01
+iks.n           =  5.29456062400710664e-03
+ikr.p_a         =  6.71290831201526612e-05
+ion.Na_i        =  8.01849095939633294e+00
+ion.K_i         =  1.29983721864305551e+02
+ion.Ca_i        =  6.31772336519627494e-05
+ion.Ca_d        =  6.99276211335551765e-05
+calcium.O_C     =  2.58605505425938860e-02
+calcium.O_TC    =  1.24789414462885290e-02
+calcium.O_TMgC  =  1.86244003074023917e-01
+calcium.O_TMgMg =  7.18101273075750113e-01
+cleft.Na_c      =  1.30009832458329072e+02
+cleft.K_c       =  5.69458595963551684e+00
+cleft.Ca_c      =  1.81717472998778651e+00
+casr.O_Calse    =  4.27277372433418845e-01
+casr.Ca_rel     =  6.21698064975615527e-01
+casr.Ca_up      =  6.34285619525465583e-01
+casr.F1         =  4.49761808318342504e-01
+casr.F2         =  2.40121576745048245e-03
+
+
+#
+# Membrane potential
+#
+[membrane]
+Cm = 0.05 [nF]
+    in [nF]
+    label membrane_capacitance
+dot(V) = -1 / Cm * (i_ion + i_diff + stimulus.i_stim)
+    in [mV]
+    label membrane_potential
+i_diff = 0 [pA]
+    bind diffusion_current
+    in [pA]
+i_ion = (
+        ina.i_Na
+        + ical.iCaL
+        + it.i_t
+        + isus.i_sus
+        + ik1.i_K1
+        + ikr.i_Kr
+        + iks.i_Ks
+        + ib.i_B_Na
+        + ib.i_B_Ca
+        + inak.i_NaK
+        + icap.i_CaP
+        + inaca.i_NaCa
+        )
+    in [pA]
+    label cellular_current
+
+
+#
+# Stimulus current
+#
+[stimulus]
+i_stim = engine.pace * stim_amplitude
+    in [pA]
+    label stimulus_current
+stim_amplitude = -2679 * 2 [pA]
+    in [pA]
+    desc: """
+        Under baseline conditions, at 1Hz with a 0.5ms stimulus, -2679 pA is
+        approximately the smallest value that triggers three successive APs.
+        """
+
+
+#
+# Engine variables
+#
+[engine]
+time = 0 [s] bind time
+    in [s]
+pace = 0 bind pace
+
+#
+# Physical constants
+#
+[phys]
+F = 96487 [C/mol]
+    in [C/mol]
+R = 8314 [mJ/mol/K]
+    in [mJ/mol/K]
+T = 306.15 [K]
+    in [K]
+
+#
+# Calcium handling in the SR
+#
+[casr]
+dot(Ca_rel) = (i_tr - i_rel) / (2 * Vol_rel * phys.F) - 31 [mM] * dot(O_Calse)
+    in [mM]
+dot(Ca_up) = (i_up - i_tr) / (2 * Vol_up * phys.F)
+    in [mM]
+dot(F1) = r_recov * (1 - F1 - F2) - r_act * F1
+dot(F2) = r_act * F1 - r_inact * F2
+I_up_max = 2800 [pA]
+dot(O_Calse) = 480 [m^3/s/mol] * Ca_rel * (1 - O_Calse) - 400 [S/F] * O_Calse
+Vol_rel = 4.41e-5 [nL]
+Vol_up = 0.0003969 [nL]
+alpha_rel = 200000 [m^3*A/mol (1e-12)]
+i_rel = alpha_rel * (F2 / (F2 + 0.25)) ^ 2 * (Ca_rel - ion.Ca_i)
+    in [pA]
+i_tr = (Ca_up - Ca_rel) * 2 * phys.F * Vol_rel / tau_tr
+    in [pA]
+i_up = I_up_max * (ion.Ca_i / k_cyca - k_xcs ^ 2 * Ca_up / k_srca) / ((ion.Ca_i + k_cyca) / k_cyca + k_xcs * (Ca_up + k_srca) / k_srca)
+    in [pA]
+k_cyca = 0.0003 [mM]
+k_rel_d = 0.003 [mM]
+k_rel_i = 0.0003 [mM]
+k_srca = 0.5 [mM]
+k_xcs = 0.4
+r_act = 203.8 [S/F] * ((ion.Ca_i / (ion.Ca_i + k_rel_i)) ^ 4 + (ion.Ca_d / (ion.Ca_d + k_rel_d)) ^ 4)
+    in [S/F]
+r_inact = 33.96 [S/F] + 339.6 [S/F] * (ion.Ca_i / (ion.Ca_i + k_rel_i)) ^ 4
+    in [S/F]
+r_recov = 0.815 [S/F]
+tau_tr = 0.01 [s]
+
+#
+# Calcium independent transient outward K current
+#
+[it]
+use membrane.V
+E_K = phys.R * phys.T / phys.F * log(cleft.K_c / ion.K_i)
+    in [mV]
+g_t = 7.5 [nS]
+i_t = g_t * r * s * (V - E_K)
+    in [pA]
+    label I_to
+dot(r) = (inf - r) / tau
+    inf = 1 / (1 + exp((V - 1 [mV]) / -11 [mV]))
+    tau = 0.0035 [s] * exp(-(V / 30 [mV]) ^ 2) + 0.0015 [s]
+dot(s) = (inf - s) / tau
+    inf = 1 / (1 + exp((V + 40.5 [mV]) / 11.5 [mV]))
+    tau = 0.4812 [s] * exp(-((V + 52.45 [mV]) / 14.97 [mV]) ^ 2) + 0.01414 [s]
+
+#
+# L-type calcium channel
+#
+[ical]
+use membrane.V
+dot(d) = (inf - d) / tau
+    inf = 1 / (1 + exp((V + 9 [mV]) / -5.8 [mV]))
+    tau = 0.0027 [s] * exp(-((V + 35 [mV]) / 30 [mV]) ^ 2) + 0.002 [s]
+finf = 1 / (1 + exp((V + 27.4 [mV]) / 7.1 [mV]))
+dot(f1) = (finf - f1) / tau
+    tau = 0.161 [s] * exp(-((V + 40 [mV]) / 14.4 [mV]) ^ 2) + 0.01 [s]
+dot(f2) = (finf - f2) / tau
+    tau = 1.3323 [s] * exp(-((V + 40 [mV]) / 14.2 [mV]) ^ 2) + 0.0626 [s]
+E_Ca_app = 60 [mV]
+k_Ca = 0.025 [mM]
+f_Ca = ion.Ca_d / (ion.Ca_d + k_Ca)
+scaling = 1
+    label I_CaL_scaling
+g_Ca_L = 6.75 [nS]
+iCaL = scaling * g_Ca_L * d * (f_Ca * f1 + (1 - f_Ca) * f2) * (V - E_Ca_app)
+    in [pA]
+    label I_CaL
+
+#
+# Na/Ca exchanger current
+#
+[inaca]
+d_NaCa = 0.0003 [m^12/mol^4]
+gamma = 0.45
+k_NaCa = 0.0374842 [m^12*A/mol^4 (1e-12)]
+i_NaCa = k_NaCa * (ion.Na_i ^ 3 * cleft.Ca_c * exp(gamma * phys.F * membrane.V / (phys.R * phys.T)) - cleft.Na_c ^ 3 * ion.Ca_i * exp((gamma - 1) * membrane.V * phys.F / (phys.R * phys.T))) / (1 + d_NaCa * (cleft.Na_c ^ 3 * ion.Ca_i + ion.Na_i ^ 3 * cleft.Ca_c))
+    in [pA]
+    label I_NaCa
+
+#
+# Background currents
+#
+[ib]
+E_Ca = phys.R * phys.T / (2 * phys.F) * log(cleft.Ca_c / ion.Ca_i)
+    in [mV]
+g_B_Ca = 0.078681 [nS]
+g_B_Na = 0.060599 [nS]
+i_B_Ca = g_B_Ca * (membrane.V - E_Ca)
+    in [pA]
+i_B_Na = g_B_Na * (membrane.V - ina.E_Na)
+    in [pA]
+
+#
+# Cleft space ion concentrations
+#
+[cleft]
+Ca_b = 1.8 [mM]
+dot(Ca_c) = (Ca_b - Ca_c) / tau_Ca + (ical.iCaL + ib.i_B_Ca + icap.i_CaP - 2 * inaca.i_NaCa) / (2 * Vol_c * phys.F)
+    in [mM]
+K_b = 5.4 [mM]
+    in [mM]
+    label K_o
+dot(K_c) = (K_b - K_c) / tau_K + (it.i_t + isus.i_sus + ik1.i_K1 + ikr.i_Kr + iks.i_Ks - 2 * inak.i_NaK) / (Vol_c * phys.F)
+    in [mM]
+    label K_c
+Na_b = 130 [mM]
+dot(Na_c) = (Na_b - Na_c) / tau_Na + (ina.i_Na + ib.i_B_Na + 3 * inak.i_NaK + 3 * inaca.i_NaCa + ion.phi_Na_en) / (Vol_c * phys.F)
+    in [mM]
+Vol_c = 0.136 * ion.Vol_i
+    in [nL]
+tau_Ca = 24.7 [s]
+tau_K = 10 [s]
+tau_Na = 14.3 [s]
+
+#
+# IKr
+#
+[ikr]
+use membrane.V
+g_Kr = 0.5 [nS]
+i_Kr = g_Kr * p_a * p_i * (V - it.E_K)
+    in [pA]
+    label I_Kr
+dot(p_a) = (inf - p_a) / tau
+    inf = 1 / (1 + exp((V + 15 [mV]) / -6 [mV]))
+    tau = 0.03118 [s] + 0.21718 [s] * exp(-((V + 20.1376 [mV]) / 22.1996 [mV]) ^ 2)
+p_i = 1 / (1 + exp((V + 55 [mV]) / 24 [mV]))
+
+#
+# IKs
+#
+[iks]
+use membrane.V
+g_Ks = 1 [nS]
+i_Ks = g_Ks * n * (V - it.E_K)
+    in [pA]
+dot(n) = (inf - n) / tau
+    inf = 1 / (1 + exp((V - 19.9 [mV]) / -12.7 [mV]))
+    tau = 0.7 [s] + 0.4 [s] * exp(-((V - 20 [mV]) / 20 [mV]) ^ 2)
+
+#
+# Intracellular Ca buffering
+#
+[calcium]
+Mg_i = 2.5 [mM]
+dot(O_C) = 200000 [m^3/s/mol] * ion.Ca_i * (1 - O_C) - 476 [S/F] * O_C
+dot(O_TC) = 78400 [m^3/s/mol] * ion.Ca_i * (1 - O_TC) - 392 [S/F] * O_TC
+dot(O_TMgC) = 200000 [m^3/s/mol] * ion.Ca_i * (1 - O_TMgC - O_TMgMg) - 6.6 [S/F] * O_TMgC
+dot(O_TMgMg) = 2000 [m^3/s/mol] * Mg_i * (1 - O_TMgC - O_TMgMg) - 666 [S/F] * O_TMgMg
+dOCdt = dot(O_C)
+    in [S/F]
+dOTCdt = dot(O_TC)
+    in [S/F]
+dOTMgCdt = dot(O_TMgC)
+    in [S/F]
+
+#
+# Intracellular ionic concentrations
+#
+[ion]
+dot(Ca_d) = -(ical.iCaL + i_di) / (2 * Vol_d * phys.F)
+    in [mM]
+dot(Ca_i) = -(-i_di + ib.i_B_Ca + icap.i_CaP - 2 * inaca.i_NaCa + casr.i_up - casr.i_rel) / (2 * Vol_i * phys.F) - (0.08 [mM] * calcium.dOTCdt + 0.16 [mM] * calcium.dOTMgCdt + 0.045 [mM] * calcium.dOCdt)
+    in [mM]
+    label Ca_i
+dot(K_i) = -(it.i_t + isus.i_sus + ik1.i_K1 + ikr.i_Kr + iks.i_Ks - 2 * inak.i_NaK + stimulus.i_stim) / (Vol_i * phys.F)
+    in [mM]
+    label K_i
+dot(Na_i) = -(ina.i_Na + ib.i_B_Na + 3 * inak.i_NaK + 3 * inaca.i_NaCa + phi_Na_en) / (Vol_i * phys.F)
+    in [mM]
+    label Na_i
+Vol_d = 0.02 * Vol_i
+    in [nL]
+Vol_i = 0.005884 [nL]
+i_di = (Ca_d - Ca_i) * 2 * phys.F * Vol_d / tau_di
+    in [pA]
+#phi_Na_en = -1.68 [pA]
+phi_Na_en = 0 [pA]
+    in [pA]
+tau_di = 0.01 [s]
+    in [s]
+
+#
+# Inward rectifier K current
+#
+[ik1]
+g_K1 = 3
+    in [nS]
+i_K1 = g_K1 * (cleft.K_c / 1 [mM]) ^ 0.4457 * (membrane.V - it.E_K) / (1 + exp(1.5 * (membrane.V - it.E_K + 3.6 [mV]) * phys.F / (phys.R * phys.T)))
+    in [pA]
+    label I_K1
+
+#
+# Sarcolemmal calcium pump current
+#
+[icap]
+i_CaP = i_CaP_max * ion.Ca_i / (ion.Ca_i + k_CaP)
+    in [pA]
+i_CaP_max = 4 [pA]
+k_CaP = 0.0002 [mM]
+
+#
+# Sodium current
+#
+[ina]
+use membrane.V
+E_Na = phys.R * phys.T / phys.F * log(cleft.Na_c / ion.Na_i)
+    in [mV]
+P_Na = 0.0016
+    in [m^3/s (1e-12)]
+i_Na = P_Na * m ^ 3 * (0.9 * h1 + 0.1 * h2) * cleft.Na_c * V * phys.F ^ 2 / (phys.R * phys.T) * (exp((membrane.V - E_Na) * phys.F / (phys.R * phys.T)) - 1) / (exp(membrane.V * phys.F / (phys.R * phys.T)) - 1)
+    in [pA]
+    label I_Na
+dot(m) = (inf - m) / tau
+    inf = 1 / (1 + exp((V + 27.12 [mV]) / -8.21 [mV]))
+    tau = 4.2e-5 * exp(-((V + 25.57 [mV]) / 28.8 [mV]) ^ 2) + 2.4e-5 [s]
+    label ina_m
+h_inf = 1 / (1 + exp((V + 63.6) / 5.3))
+    label ina_h12_inf
+h_factor = 1 / (1 + exp((V + 35.1) / 3.2))
+dot(h1) = (h_inf - h1) / tau
+    tau = 0.03 * h_factor + 0.0003
+dot(h2) = (h_inf - h2) / tau
+    tau = 0.12 * h_factor + 0.003
+
+#
+# Sodium-potassium pump
+#
+[inak]
+use membrane.V
+use cleft.K_c, ion.Na_i
+i_NaK = i_NaK_max * K_c / (K_c + k_NaK_K) * Na_i ^ 1.5 / (Na_i ^ 1.5 + k_NaK_Na ^ 1.5) * (V + 150 [mV]) / (V + 200 [mV])
+    in [pA]
+    label I_NaK
+i_NaK_max = 70.8253 [pA]
+k_NaK_K = 1 [mM]
+k_NaK_Na = 11 [mM]
+
+#
+# Sustained outward K current
+#
+[isus]
+use membrane.V
+g_sus = 2.75 [nS]
+i_sus = g_sus * r * s * (V - it.E_K)
+    in [pA]
+    label I_Kur
+dot(r) = (inf - r) / tau
+    inf = 1 / (1 + exp((V + 4.3 [mV]) / -8 [mV]))
+    tau = 0.009 [s] / (1 + exp((V + 5 [mV]) / 12 [mV])) + 0.0005 [s]
+dot(s) = (inf - s) / tau
+    inf = 0.4 / (1 + exp((V + 20 [mV]) / 10 [mV])) + 0.6
+    tau = 0.047 [s] / (1 + exp((V + 60 [mV]) / 10 [mV])) + 0.3 [s]
+
+[[protocol]]
+# Level  Start    Length   Period   Multiplier
+1        0.05     0.0005   1        0
+
+[[script]]
+import matplotlib.pyplot as pl
+import myokit
+
+# Get model and protocol, create simulation
+m = get_model()
+p = get_protocol()
+s = myokit.Simulation(m, p)
+
+# Run simulation
+d = s.run(3, log_interval=1e-3, log=['engine.time', 'membrane.V'])
+
+# Display the results
+pl.figure()
+pl.plot(d.time(), d['membrane.V'])
+pl.show()
+
