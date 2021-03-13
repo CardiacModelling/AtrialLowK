@@ -3,11 +3,10 @@
 import datetime
 import matplotlib.dates
 import matplotlib.pyplot as plt
-import numpy as np
 import scipy.optimize
 
 date_format = '%Y-%m-%d %H:%M'
-points = [[ # 2.5 mM
+points = [[     # 2.5 mM
     ['2020-11-13 13:34', 0],
     ['2020-11-13 15:41', 50],
     ['2020-11-13 17:42', 100],
@@ -28,7 +27,7 @@ points = [[ # 2.5 mM
     ['2020-11-15 01:56', 850],
     ['2020-11-15 03:54', 900],
 
-], [ # 3.2 mM
+], [    # 3.2 mM
     ['2020-11-10 00:50', 0],
     ['2020-11-10 01:06', 5],
     ['2020-11-10 01:08', 6],
@@ -89,7 +88,7 @@ points = [[ # 2.5 mM
     ['2020-11-13 03:05', 800],
     ['2020-11-13 05:03', 850],
     ['2020-11-13 07:02', 900],
-],[     # 5.4
+], [     # 5.4
     #['2020-11-13 07:16', 0],
     #['2020-11-13 09:11', 50],
     #['2020-11-13 09:50', 64],
@@ -115,7 +114,7 @@ points = [[ # 2.5 mM
     ['2020-11-16 05:59', 800],
     ['2020-11-16 07:58', 850],
     ['2020-11-16 10:00', 900],
-],[ # 8
+], [    # 8
     ['2020-11-16 10:14', 0],
     ['2020-11-16 10:22', 3],
     ['2020-11-16 12:25', 50],
@@ -141,12 +140,15 @@ points = [[ # 2.5 mM
 ]]
 goal = 15 * 60
 
+
 # Line through the origin, for fitting
 def line(x, slope):
     return x * slope
 
+
 def inv_line(y, slope):
     return y / slope
+
 
 # Matplotlib date formatting
 plot_format = matplotlib.dates.DateFormatter('%Y-%m-%d\n%H:%M')

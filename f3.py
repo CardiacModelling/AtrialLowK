@@ -9,20 +9,18 @@ import myokit
 import numpy as np
 import os
 import shared
-import sys
 
 # Get path for figure
 fpath = shared.figure_dir()
 fname = 'figure-3'
-debug = 'debug' in sys.argv
+shared.splash(fname)
 
 # Load model
 model = shared.model('voigt')
 name = model.name()
 
 # Create protocol
-cl = 1000
-protocol = myokit.pacing.blocktrain(cl, duration=0.5, offset=50)
+protocol = shared.default_protocol()
 
 # Maximum time and voltage range to show in plots
 tmax = 800
@@ -33,7 +31,7 @@ pre_time_1 = 1000
 pre_time_2 = 15 * 60 * 1000
 
 # Prepare model
-shared.prepare_model(model, protocol, fix_cleft_ko=True, pre_pace=not debug)
+shared.prepare_model(model, protocol)
 
 # Get some variables
 v = model.labelx('membrane_potential')
@@ -69,24 +67,20 @@ vrs2 = []
 s = myokit.Simulation(model, protocol)
 s.set_tolerance(1e-8, 1e-8)
 for k in ks:
-    print(f'Simulating {k}mM')
+    print(f'Running for {k}mM')
 
-    # Create simulation, set [K]o and do first pre-pacing
-    s.reset()
-    s.set_constant(ko, k)
-    if pre_time_1:
-        s.run(pre_time_1, log=[])
+    # Get state after 1 beat
+    x = shared.state_fast(model, protocol, k)
 
     # Update model variables and calculate early IVs
     fko.set_rhs(k)
-    x = s.state()
     for i, state in enumerate(fixed_states):
         if state.label() == 'membrane_potential':
             state.set_state_value(x[i])
         else:
             state.set_rhs(x[i])
 
-    vr = [s.state()[v.indice()]]
+    vr = [x[v.indice()]]
 
     f = finak.pyfunc()
     vr.append(f(vr[0]))
@@ -98,24 +92,21 @@ for k in ks:
 
     vrs1.append(vr)
 
-    # Simulate early AP
-    d1s.append(s.run(tmax).npview())
-    if debug:
-        continue
+    # Get early AP
+    d1s.append(shared.log_fast(model, protocol, k))
 
-    # Second pre-pacing
-    s.reset()
-    d3s.append(s.run(pre_time_2, log=[t, ki, nai]).npview())
+    # Update to state after 900 beats
+    d3s.append(shared.log_progress(model, protocol, k))
 
     # Update model variables and calculate late IVs
-    x = s.state()
+    x = shared.state_slow(model, protocol, k)
     for i, state in enumerate(fixed_states):
         if state.label() == 'membrane_potential':
             state.set_state_value(x[i])
         else:
             state.set_rhs(x[i])
 
-    vr = [s.state()[v.indice()]]
+    vr = [x[v.indice()]]
 
     f = finak.pyfunc()
     vr.append(f(vr[0]))
@@ -128,12 +119,8 @@ for k in ks:
     vrs2.append(vr)
 
     # Simulate late AP
-    d2s.append(s.run(tmax).npview())
-if debug:
-    d3s = d2s = d1s
-    inak_v2 = inak_v1
-    ik1_v2 = ik1_v1
-    vrs2 = vrs1
+    d2s.append(shared.log_slow(model, protocol, k))
+
 
 #
 # Create figure

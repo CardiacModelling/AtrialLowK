@@ -1,9 +1,0 @@
-#/usr/bin/env bash
-python3 m6b-strand-frp.py courtemanche
-python3 m6b-strand-frp.py grandi
-python3 m6b-strand-frp.py koivumaki
-python3 m6b-strand-frp.py maleckar
-python3 m6b-strand-frp.py ni
-python3 m6b-strand-frp.py nygren
-python3 m6b-strand-frp.py voigt
-

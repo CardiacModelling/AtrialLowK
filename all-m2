@@ -1,9 +1,0 @@
-#/usr/bin/env bash
-python3 m2-iv.py courtemanche
-python3 m2-iv.py grandi
-python3 m2-iv.py koivumaki
-python3 m2-iv.py maleckar
-python3 m2-iv.py ni
-python3 m2-iv.py nygren
-python3 m2-iv.py voigt
-

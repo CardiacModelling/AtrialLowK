@@ -1,0 +1,9 @@
+#/usr/bin/env bash
+python3 s4-restitution.py voigt
+python3 s4-restitution.py grandi
+python3 s4-restitution.py courtemanche
+python3 s4-restitution.py ni
+python3 s4-restitution.py nygren
+python3 s4-restitution.py maleckar
+python3 s4-restitution.py koivumaki
+

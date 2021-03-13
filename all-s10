@@ -1,0 +1,8 @@
+#/usr/bin/env bash
+python3 s10-ina-sd.py voigt
+python3 s10-ina-sd.py grandi
+python3 s10-ina-sd.py courtemanche
+python3 s10-ina-sd.py ni
+python3 s10-ina-sd.py nygren
+python3 s10-ina-sd.py maleckar
+python3 s10-ina-sd.py koivumaki

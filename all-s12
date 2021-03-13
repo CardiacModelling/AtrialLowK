@@ -1,0 +1,9 @@
+#/usr/bin/env bash
+python3 s12-iv.py voigt
+python3 s12-iv.py grandi
+python3 s12-iv.py courtemanche
+python3 s12-iv.py ni
+python3 s12-iv.py nygren
+python3 s12-iv.py maleckar
+python3 s12-iv.py koivumaki
+

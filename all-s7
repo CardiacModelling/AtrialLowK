@@ -1,0 +1,8 @@
+#/usr/bin/env bash
+python3 s7-fast-slow.py voigt
+python3 s7-fast-slow.py grandi
+python3 s7-fast-slow.py courtemanche
+python3 s7-fast-slow.py ni
+python3 s7-fast-slow.py nygren
+python3 s7-fast-slow.py maleckar
+python3 s7-fast-slow.py koivumaki

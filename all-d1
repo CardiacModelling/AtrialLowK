@@ -1,9 +1,0 @@
-#/usr/bin/env bash
-python3 d1-restitution.py grandi
-python3 d1-restitution.py courtemanche
-python3 d1-restitution.py koivumaki
-python3 d1-restitution.py maleckar
-python3 d1-restitution.py ni
-python3 d1-restitution.py nygren
-python3 d1-restitution.py voigt
-

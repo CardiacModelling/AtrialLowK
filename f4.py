@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Figure 4: Changes in [Na]i
+# Figure 4: Detailed changes in voigt after 8 minutes
 #
 import os
 import sys
@@ -19,6 +19,7 @@ matplotlib.rcParams['ytick.minor.visible'] = True
 fpath = shared.figure_dir()
 fname = 'figure-4'
 debug = 'debug' in sys.argv
+shared.splash(fname)
 
 # Load model
 model = shared.model('voigt')
@@ -26,18 +27,17 @@ name = model.name()
 
 # Create protocol
 cl = 1000   # MUST be 1000 for units nC to work out
-protocol = myokit.pacing.blocktrain(cl, duration=0.5, offset=50)
+protocol = shared.default_protocol()
 
 # Time to pre-pace after changing [K]o level
-n_beats = 481 #if not debug else 51
+n_beats = 481
 text_1 = '1 sec'
 text_2 = '8 min'
 pre_time_1 = cl
 pre_time_2 = n_beats * cl
 
 # Prepare model
-shared.prepare_model(
-    model, protocol, fix_cleft_ko=True, pre_pace=not debug, pA=True)
+shared.prepare_model(model, protocol, pA=True)
 
 # Get some variables
 time = model.time()
@@ -114,7 +114,7 @@ for k in ks:
 # Create figure
 #
 fig = plt.figure(figsize=(9, 8.5))  # Two-column size
-fig.subplots_adjust(0.07, 0.06, 0.985, 0.91)
+fig.subplots_adjust(0.075, 0.06, 0.985, 0.91)
 grid = matplotlib.gridspec.GridSpec(4, 4, wspace=0.60, hspace=0.50)
 
 # Add model name

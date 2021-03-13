@@ -1,8 +1,0 @@
-#/usr/bin/env bash
-python3 m3-inak.py courtemanche &
-python3 m3-inak.py grandi &
-python3 m3-inak.py koivumaki &
-python3 m3-inak.py maleckar &
-python3 m3-inak.py ni &
-python3 m3-inak.py nygren &
-python3 m3-inak.py voigt

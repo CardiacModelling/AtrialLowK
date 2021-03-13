@@ -6,16 +6,14 @@ import matplotlib
 import matplotlib.gridspec
 import matplotlib.patches
 import matplotlib.pyplot as plt
-import myokit
 import numpy as np
 import os
 import shared
-import sys
 
 # Get path for figure
 fpath = shared.figure_dir()
 fname = 'figure-2'
-debug = 'debug' in sys.argv
+shared.splash(fname)
 
 # Load models
 model1 = shared.model('voigt')
@@ -33,32 +31,20 @@ alpha = 0.3
 black = '#444444'
 
 # Create protocol
-cl = 1000
-protocol = myokit.pacing.blocktrain(cl, duration=0.5, offset=50)
-
-# Maximum time to show in plots
-tmax = 800
-
-# Time to pre-pace after changing [K]o level
-pre_time = 1000
+protocol = shared.default_protocol()
 
 # Prepare models
-shared.prepare_model(model1, protocol, fix_cleft_ko=True, pre_pace=not debug)
-shared.prepare_model(model2, protocol, fix_cleft_ko=True, pre_pace=not debug)
+shared.prepare_model(model1, protocol)
+shared.prepare_model(model2, protocol)
 
 # External potassium levels and colours
 ks = shared.ko_levels + [8]
 cs = shared.ko_colors + ['#777777']
 ls = ['-', '-', '-', '-', '--']
-if debug:
-    ks, cs, ls = [ks[3]], [cs[3]], [ls[3]]
 
 #
 # Create figure
 #
-#fig = plt.figure(figsize=(9, 9))  # Two-column size
-#fig.subplots_adjust(0.09, 0.05, 0.98, 0.96)
-#grid = matplotlib.gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.4)
 fig = plt.figure(figsize=(9, 7.5))  # Two-column size
 fig.subplots_adjust(0.08, 0.065, 0.99, 0.95)
 grid = matplotlib.gridspec.GridSpec(3, 2, wspace=0.2, hspace=0.3)
@@ -79,30 +65,24 @@ fig.text(0.003, 0.940, 'A', letter_font)
 fig.text(0.003, 0.610, 'B', letter_font)
 fig.text(0.003, 0.290, 'C', letter_font)
 
+
 #
 # A. Plot APs
 #
 def ap(ax, model, protocol, levels):
-    # Get some variables
     vm = model.labelx('membrane_potential')
-    ko = model.labelx('K_o')
 
     # Calculate APs, fetch resting potentials
     ds = []
-    vr = [] # Vrest, after 1 second
+    vr = []     # Vrest, after 1 second
     for k in levels:
-        print(f'Simulating {k}mM with {model.name()}')
+        print(f'Running for {k}mM with {model.name()}')
 
-        # Create new simulation (otherwise pre() can't be used!)
-        s = myokit.Simulation(model, protocol)
-        s.set_tolerance(1e-8, 1e-8)
-        s.set_constant(ko, k)
-        if pre_time:
-            s.run(pre_time, log=[])
-        vr.append(s.state()[vm.indice()])
-        d = s.run(tmax).npview()
-        ds.append(d)
-        del(s)
+        # Get log
+        ds.append(shared.log_fast(model, protocol, k))
+
+        # Get resting potential
+        vr.append(shared.state_fast(model, protocol, k)[vm.indice()])
 
     # Plot APs
     for k, c, l, d, in zip(ks, cs, ls, ds):
@@ -110,6 +90,7 @@ def ap(ax, model, protocol, levels):
 
     # Return resting potentials
     return vr
+
 
 # Plot APs, store Vrest
 ax = fig.add_subplot(grid[0, 0])
@@ -129,6 +110,7 @@ ax.set_ylabel('V (mV)')
 ax.set_ylim(-81, 15)
 vr1 = ap(ax, model1, protocol, ks)
 
+
 #
 # B. Calculate and plot IV curves for IK1
 #
@@ -137,7 +119,6 @@ def ik1_iv(ax, model, protocol, levels, vrests):
 
     # Calculate from model
     fixed = model.clone()
-    fki = fixed.labelx('K_i')
     fko = fixed.labelx('K_o')
     fik = fixed.labelx('I_K1')
     fixed_states = list(fixed.states())
@@ -159,6 +140,7 @@ def ik1_iv(ax, model, protocol, levels, vrests):
         ax.plot(xy[0], xy[1], color=c, ls=l)
     for vr, ir, c in zip(vrests, irs, cs):
         ax.plot(vr, ir, 'o', markersize=10, fillstyle='none', color=c)
+
 
 ax = fig.add_subplot(grid[1, 0])
 ax.set_xlabel('V (mV)')
@@ -193,9 +175,6 @@ for k, c in zip(ks, coords):
 #
 def inak(ax, model, protocol, levels, colors):
 
-    # Get some variables
-    ko = model.labelx('K_o')
-
     # Create fixed Ko model for IV curves
     fixed = model.clone()
     fko = fixed.labelx('K_o')
@@ -209,18 +188,13 @@ def inak(ax, model, protocol, levels, colors):
     vs = np.linspace(-120, 20, 141)
     ivs = []
     for k in levels:
-        print(f'Simulating {k}mM with {model.name()}')
+        print(f'Plotting INaK for {k}mM with {model.name()}')
 
-        # Create simulation, set [K]o and do first pre-pacing
-        s = myokit.Simulation(model, protocol)
-        s.set_tolerance(1e-8, 1e-8)
-        s.set_constant(ko, k)
-        if pre_time:
-            s.run(pre_time, log=[])
+        # Update Ko
+        fko.set_rhs(k)
 
         # Update fixed model variables and calculate IV
-        fko.set_rhs(k)
-        x = s.state()
+        x = shared.state_fast(model, protocol, k)
         for i, state in enumerate(fixed_states):
             if state.label() == 'membrane_potential':
                 state.set_state_value(x[i])
@@ -233,6 +207,7 @@ def inak(ax, model, protocol, levels, colors):
     ax.grid(True)
     for xy, c, l in zip(ivs, colors, ls):
         ax.plot(xy[0], xy[1], color=c, ls=l)
+
 
 ax = fig.add_subplot(grid[2, 0])
 ax.set_xlabel('V (mV)')

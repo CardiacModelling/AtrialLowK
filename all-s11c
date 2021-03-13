@@ -1,0 +1,9 @@
+#/usr/bin/env bash
+python3 s11c-rm-low.py 5.4 5 5
+python3 s11c-rm-low.py 5.4 1 5
+python3 s11c-rm-low.py 5.4 10 5
+python3 s11c-rm-low.py 2.3 5 5
+python3 s11c-rm-low.py 2.3 1 5
+python3 s11c-rm-low.py 2.3 10 5
+python3 s11c-rm-low.py 2.3 5 0.001
+

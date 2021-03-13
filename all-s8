@@ -1,0 +1,8 @@
+#/usr/bin/env bash
+python3 s8-strand.py voigt
+python3 s8-strand.py grandi
+python3 s8-strand.py courtemanche
+python3 s8-strand.py ni
+python3 s8-strand.py nygren
+python3 s8-strand.py maleckar
+python3 s8-strand.py koivumaki

@@ -5,31 +5,28 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec
-import myokit
 import numpy as np
 import os
 import shared
-import sys
 
 # Get path for figure
 fpath = shared.figure_dir()
 fname = 'figure-1'
-debug = 'debug' in sys.argv
+shared.splash(fname)
 
 # Load model
 model1 = shared.model('grandi')
 model2 = shared.model('voigt')
 
 # Create protocol
-cl = 1000
-protocol = myokit.pacing.blocktrain(cl, duration=0.5, offset=50)
+protocol = shared.default_protocol()
 
 # Maximum time to show in plots
 tmax = 600 + 50
 
 # Prepare models
-shared.prepare_model(model1, protocol, pre_pace=not debug)
-shared.prepare_model(model2, protocol, pre_pace=not debug)
+shared.prepare_model(model1, protocol)
+shared.prepare_model(model2, protocol)
 
 # Variables to plot, and y limits
 conc = {
@@ -58,17 +55,13 @@ changed = set(['ina.INa', 'ik1.IK1', 'ikach.IKACh'])
 
 
 # Run simulation
-print(f'Simulating...')
-s1 = myokit.Simulation(model1, protocol)
-s1.set_tolerance(1e-8, 1e-8)
-d1 = s1.run(tmax).npview()
-s2 = myokit.Simulation(model2, protocol)
-s2.set_tolerance(1e-8, 1e-8)
-d2 = s2.run(tmax).npview()
+print(f'Running...')
+d1 = shared.log_fast(model1, protocol, 5.4)
+d2 = shared.log_fast(model2, protocol, 5.4)
 
 # Show without offset
-d1['engine.time'] -= 50
-d2['engine.time'] -= 50
+d1['engine.time'] -= 1050
+d2['engine.time'] -= 1050
 
 # Times to show
 xlim = (-20, 520)
@@ -116,9 +109,9 @@ ax.legend()
 vr1 = np.round(d1['membrane.V'][0], 1)
 vr2 = np.round(d2['membrane.V'][0], 1)
 
-ax.text(0.7, 0.48, f'Vr = {vr1} mV',  transform=ax.transAxes,
+ax.text(0.7, 0.48, f'Vr = {vr1} mV', transform=ax.transAxes,
         horizontalalignment='left', color='tab:blue')
-ax.text(0.7, 0.37, f'Vr = {vr2} mV',  transform=ax.transAxes,
+ax.text(0.7, 0.37, f'Vr = {vr2} mV', transform=ax.transAxes,
         horizontalalignment='left', color='tab:orange')
 
 ax = fig.add_subplot(grid[0:2, 1])

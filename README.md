@@ -49,47 +49,36 @@ Models:
 
 To re-run the single cell simulations, and create the main figures, use:
 
-- Figure 1: [`f1.py`](./f1.py), stores figures in [`figure-1`](./figure-1).
-- Figure 2: [`f2.py`](./f2.py), stores figures in [`figure-2`](./figure-2).
-- Figure 3: [`f3.py`](./f3.py), stores figures in [`figure-3`](./figure-3).
-- Figure 4: [`f4.py`](./f4.py), stores figures in [`figure-4`](./figure-4).
+- Figure 1: [`f1.py`](./f1.py)
+- Figure 2: [`f2.py`](./f2.py)
+- Figure 3: [`f3.py`](./f3.py)
+- Figure 4: [`f4.py`](./f4.py)
+- Figure 5: [`f5.py`](./f5.py)
+- Finally, to generate the non-schematic parts of Figure 6, use [`f6.py`](./f6.py).
 
-The final figures require multiple scripts to run.
-For the fiber simulations:
+These store their figures in directories `figure-1`, `figure-2`, etc.
 
-- [`m6a-strand-run.py <model> <ko> <cvt>`](./m6a-strand-run.py) runs the "1 second" experiments for the given model, potassium level, and CV threshold (the minimum CV at which propagation is said to have occurred).
-  For the simulations in the main body of the paper, at baseline potasisum, use `m6a-strand-run.py voigt 5.4 40`.
-- For the "15 minute" experiments, run the same script but with the added argument "long", e.g. `m6a-strand-run.py voigt 5.4 40 long`
-- These scripts store generated data in [`strand-data`](./strand-data)
-- Supplemental figure results are generated and stored in [`sup-figure-m6a-strand-run`](./sup-figure-m6a-strand-run).
-- Figure 5: [`f5.py`](./f5.py), stores figures in [`figure-5`](./figure-5).
+## Supplementary figures
 
-Finally, to generate the non-schematic parts of Figure 6, use:
+Several supplementary figures are provided:
 
-- Figure 6: [`f6.py`](./f6.py), stores figures in [`figure-6`](./figure-6).
+- [`s1-vr.py`](./s1-vr.py) creates supplementary figure 1, showing digitised data from [Gelband et al. 1972](https://doi.org/10.1161/01.RES.30.3.293) and [Ten Eick & Singer, 1979](https://doi.org/10.1161/01.RES.44.4.545), and comparing with model predictions.
+- [`s2-ap-cat.py`](./s2-ap-cat.py) creates a model comparison figure showing AP and CaT.
+- [`s3-relative-contributions.py`](./s3-relative-contributions.py) creates a figure showing relative contributions of all currents.
+- [`s4-restitution.py <model>`](./s4-restitution.py) creates a restitution curve for the given model, and plots it alongside data stored in `literature-data`, digitised from [Van Wagoner et al.](https://doi.org/10.1161/01.RES.85.5.428).
+- [`s5-ik1-ko.py`](./s5-ik1-ko.py) generates a figure showing the three ways in which external K+ affects IK1.
+- [`s6-ik1-x.py`](./s6-ik1-x.py) generates a figure showing the K-dependence of the rectifiation variable in four models.
+- [`s7-fast-slow.py <model>`](./s7-fast-slow.py) generates a figure showing short and long-term changes in concentrations, AP, IK1, INaK, and INaCa.
+- [`s8-strand.py`](./s8-strand.py) performs strand simulations and creates an overview figure.
+- [`s9-dvdtmax.py <model>`](./s9-dvdtmax.py) generates a figure showing maximum dV/dt for all models.
+- [`s10-ina-sd.py <model>`](./s10-ina-sd.py) generates a figure with single-cell excitability data (INa availability and SD curves).
+- [`s11a-rm-calculations.py`](./s11a-rm-calculations.py) creates a figure showing details of membrane resistance calculations, as do
+- [`s11b-rm-ko.py`](./s11b-rm-ko.py), and
+- [`s11c-rm-low.py`](./s11c-rm-low.py) (which can be customised by changing the variables `k`, `dt`, and `dv`` inside the script).
+- [`s11d-rm.py`](./s11d-rm.py) creates a membrane resistance figure for a chosen model.
+- [`s12-iv.py <model>`](./s12-iv.py) generates a figure showing instantaneous IV relationships at low K.
 
-## Supplementary figures (fixed models)
+Linux or OS/X users can use the `all-x` scripts to generate figures for all models.
+Similarly, the `all` script regenerates all figures in this study.
 
-Several supplementary figures are provided, some of which can run with different models, some of which are fixed to a single model or compare models.
-
-- [`a1-ap-cat.py`](./a1-ap-cat.py`) creates a model comparison figure, stored in [`sup-figure-a1-ap-cat`](./sup-figure-a1-ap-cat).
-- [`a2-relative-contributions.py`](./a2-relative-contributions.py`) creates a figure showing relative contributions of all currents, stored in [`sup-figure-a2-relative-contributions`](./sup-figure-a2-relative-contributions).
-- [`a3-rm-calculations.py`](./a3-rm-calculations.py) creates a figure showing details of membrane resistance calculations, as do
-- [`a4-rm-ko.py`](./a4-rm-ko.py), and
-- [`a5-rm-low.py`](./a5-rm-low.py) (which can be customised by changing the variables `k`, `dt`, and `dv`` inside the script).
-- [`a6-rm.py`](./a6-rm.py) creates a membrane resistance figure specifically for the Voigt-Heijman model.
-- [`a7-sd.py`](./a7-sd.py) creates a strength-duration curve specifically for the Voigt-Heijman model. It requires `m5-sd` to have been run (see below).
-
-## Supplementary figures (model agnostic)
-
-- [`d1-restitution.py <model>`](./d1-restitution.py) creates a restitution curve for the given model, and plots it alongside data stored in `literature-data`, digitised from [Van Wagoner et al.](https://doi.org/10.1161/01.RES.85.5.428).
-- [`m1-ko.py <model>`](./m1-ko.py) generates a figure showing short-term changes with low K, for the selected model.
-- [`m2-iv.py <model>`](./m2-iv.py) generates a figure showing instantaneous IV relationships at low K.
-- [`m3-inak.py <model>`](./m3-inak.py) generates a figure showing short and long-term changes in concentrations, AP, IK1, INaK, and INaCa.
-- [`m4-ina.py <model>`](./m4-ina.py) generates a figure showing the `h_inf * j_inf` curve for INa, and indicates the resting potential at various K concentrations.
-- [`m5-sd.py`](./m5-sd.py) generates an SD curve (see "main figures" section above).
-- [`m6a-strand-run.py`](./m6a-strand-run.py) performs fiber simulations (see "main figures" section above).
-- [`m6b-strand-frp.py`](./m6b-strand-frp.py) generates a supplemental figure showing details of the procedure to determine the functional refractory period.
-- [`m6c-strand-wl.py`](./m6c-strand-wl.py) generates a supplemental figure showing wavelength of conduction.
-- Linux or OS/X users can run supplementary code for all models (and concentrations) using the `all-x` scripts.
 

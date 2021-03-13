@@ -448,18 +448,17 @@ use membrane.V
 use nernst.EK
 Na_observed = sodium.Na_sl
     in [mM]
-a_fact = 0.1 + 0.9 / (1 + (Na_observed / 7 [mM])^2)
-IK1_Fact = 2.1
 inf = a / (a + b)
-    a = a_fact * 1 [1/ms] / (1 + exp(0.2385 [1/mV] * (V - EK - 59.215 [mV])))
+    a_fact = 0.1 [1/ms] + 0.9 [1/ms] / (1 + (Na_observed / 7 [mM])^2)
+    a = a_fact / (1 + exp(0.2385 [1/mV] * (V - EK - 59.215 [mV])))
         in [1/ms]
-    b = 1 [1/ms] * (
-            (0.49124 * exp(0.08032 [1/mV] * (V - EK + 5.476 [mV]))
-                + exp(0.06175 [1/mV] * (V - EK - 594.31 [mV])))
-            / (1 + exp(-0.5143 [1/mV] * (V - EK + 4.753 [mV]))))
+    b = 1 [1/ms] * (0.49124 * exp(0.08032 [1/mV] * (V - EK + 5.476 [mV]))
+                     + exp(0.06175 [1/mV] * (V - EK - 594.31 [mV]))
+                   ) / (1 + exp(-0.5143 [1/mV] * (V - EK + 4.753 [mV])))
         in [1/ms]
 gK1 = (1 + cell.AF) * sqrt(ion.K_o / 5.4 [mM]) * 0.0525 [mS/uF]
     in [mS/uF]
+IK1_Fact = 2.1
 IK1 = IK1_Fact * gK1 * inf * (V - EK)
     in [A/F]
     label I_K1

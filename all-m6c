@@ -1,9 +1,0 @@
-#/usr/bin/env bash
-python3 m6c-strand-wl.py courtemanche
-python3 m6c-strand-wl.py grandi
-python3 m6c-strand-wl.py koivumaki
-python3 m6c-strand-wl.py maleckar
-python3 m6c-strand-wl.py ni
-python3 m6c-strand-wl.py nygren
-python3 m6c-strand-wl.py voigt
-

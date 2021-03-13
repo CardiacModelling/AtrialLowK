@@ -1,0 +1,8 @@
+#/usr/bin/env bash
+python3 s11d-rm.py voigt
+python3 s11d-rm.py grandi
+python3 s11d-rm.py courtemanche
+python3 s11d-rm.py ni
+python3 s11d-rm.py nygren
+python3 s11d-rm.py maleckar
+python3 s11d-rm.py koivumaki

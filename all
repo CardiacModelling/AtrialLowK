@@ -1,0 +1,26 @@
+#/usr/bin/env bash
+python3 f1.py
+python3 f2.py
+python3 f3.py
+python3 f4.py
+python3 f5.py
+python3 f6.py
+
+python3 s1-vr.py
+python3 s1-vr.py sim
+python3 s2-ap-cat.py
+python3 s3-relative-contributions.py
+./all-s4
+python3 s5-ik1-ko.py voigt
+python3 s5-ik1-ko.py nygren
+python3 s6-ik1-x.py
+./all-s7
+./all-s8
+python3 s9-dvdtmax.py
+./all-s10
+python3 s11a-rm-calculations.py
+python3 s11b-rm-ko.py
+./all-s11c
+./all-s11d
+./all-s12
+
