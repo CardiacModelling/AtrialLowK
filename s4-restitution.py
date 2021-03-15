@@ -128,13 +128,13 @@ else:
 
     # APD
     apd50_c = myokit.DataLog.load_csv(
-        os.path.join(dpath, 'van-wagoner-figure-5c-APD90Ctrl.csv'))['y']
-    apd50_n = myokit.DataLog.load_csv(
-        os.path.join(dpath, 'van-wagoner-figure-5c-APD90Nif.csv'))['y']
-    apd90_c = myokit.DataLog.load_csv(
         os.path.join(dpath, 'van-wagoner-figure-5c-APD50Ctrl.csv'))['y']
-    apd90_n = myokit.DataLog.load_csv(
+    apd50_n = myokit.DataLog.load_csv(
         os.path.join(dpath, 'van-wagoner-figure-5c-APD50Nif.csv'))['y']
+    apd90_c = myokit.DataLog.load_csv(
+        os.path.join(dpath, 'van-wagoner-figure-5c-APD90Ctrl.csv'))['y']
+    apd90_n = myokit.DataLog.load_csv(
+        os.path.join(dpath, 'van-wagoner-figure-5c-APD90Nif.csv'))['y']
 
 
 # Create figure
