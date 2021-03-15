@@ -30,7 +30,7 @@ for model in models:
 tmax = 500
 
 # Create figure
-fig = plt.figure(figsize=(9, 11))    # Two-column size
+fig = plt.figure(figsize=(9, 10))    # Two-column size
 fig.subplots_adjust(0.08, 0.06, 0.98, 0.99, hspace=0.2)
 grid = matplotlib.gridspec.GridSpec(2, 1)
 
