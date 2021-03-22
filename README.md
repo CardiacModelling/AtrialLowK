@@ -1,6 +1,6 @@
 # Atrial Low-K code
 
-This repository contains the code needed to reproduce the figures and simulations for the paper _"Small Decreases in Plasma K+ Prolong Action Potential Repolarization and May Promote Rhythm Disturbances in Human Atria"_.
+This repository contains the code needed to reproduce the figures and simulations for the paper _"Immediate and delayed response of simulated human atrial myocytes to clinically-relevant hypokalemia"_.
 
 ## Requirements
 
