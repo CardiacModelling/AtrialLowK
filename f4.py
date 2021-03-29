@@ -250,16 +250,16 @@ for i, k in enumerate(ks):
     ax.plot(beats, qinaks1, label='$I_{NaK}$', color=cmap(0))
 
     out = qinacas1
-    ax.fill_between(beats, out * 0, out, color=cmap(1), alpha=0.1)
+    ax.fill_between(beats, out * 0, out, color='#fff1e6')
     ax.plot(beats, out, label='$I_{NaCa}$', color=cmap(1))
 
     plus = out + qinabs1
-    ax.fill_between(beats, out, plus, color=cmap(2), alpha=0.1)
+    ax.fill_between(beats, out, plus, color='#e9f5e9')
     out = plus
     ax.plot(beats, out, label='... + $I_{NaB}$', color=cmap(2))
 
     plus = out + qinas1
-    ax.fill_between(beats, out, plus, color=cmap(3), alpha=0.1)
+    ax.fill_between(beats, out, plus, color='#fae8e8')
     out = plus
     ax.plot(beats, out, label='... + $I_{Na}$', color=cmap(3))
 
@@ -273,5 +273,6 @@ path = os.path.join(fpath, fname)
 print('Saving to ' + path)
 plt.savefig(path + '.png')
 plt.savefig(path + '.pdf')
+plt.savefig(path + '.eps')
 plt.savefig(path + '.jpg', dpi=600)
 print('Done')

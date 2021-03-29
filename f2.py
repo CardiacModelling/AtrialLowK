@@ -26,9 +26,6 @@ boxes1 = [(-80, 24), (-30, 22), (-48, 16), (-71, 25)]
 boxes2 = [(-105, 38), (-29, 21), (-62, 46), (-100, 53)]
 
 colors = ['#555555', 'tab:blue', 'tab:orange', 'tab:green']
-#colors = ['#555555', 'tab:red', 'tab:purple', 'tab:blue']
-alpha = 0.3
-black = '#444444'
 
 # Create protocol
 protocol = shared.default_protocol()
@@ -234,5 +231,6 @@ path = os.path.join(fpath, fname)
 print('Saving to ' + path)
 plt.savefig(path + '.png')
 plt.savefig(path + '.pdf')
+plt.savefig(path + '.eps')
 plt.savefig(path + '.jpg', dpi=600)
 print('Done')
