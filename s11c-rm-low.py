@@ -12,7 +12,7 @@ import shared
 import sys
 
 if len(sys.argv) != 4:
-    print(f'Syntax: {sys.argv[0]} k dt dv')
+    print(f'Syntax: {sys.argv[0]} k dv dt')
     sys.exit(1)
 
 k = float(sys.argv[1])
