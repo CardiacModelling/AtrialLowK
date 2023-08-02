@@ -1,0 +1,15 @@
+To cite this work, please use
+
+Clerx, M., Mirams, G. R., Rogers, A. J., Narayan, S. M., & Giles, W. R. (2021). Immediate and delayed response of simulated human atrial myocytes to clinically-relevant hypokalemia. Frontiers in Physiology, 12, 651162.
+
+A BibTeX entry for LaTeX users is
+
+@article{Clerx2021AtrialLowK,
+  title={Immediate and delayed response of simulated human atrial myocytes to clinically-relevant hypokalemia},
+  author={Clerx, Michael and Mirams, Gary R and Rogers, Albert J and Narayan, Sanjiv M and Giles, Wayne R},
+  journal={Frontiers in Physiology},
+  volume={12},
+  pages={651162},
+  year={2021},
+  publisher={Frontiers Media SA}
+}

@@ -1,6 +1,7 @@
 # Atrial Low-K code
 
-This repository contains the code needed to reproduce the figures and simulations for the paper _"Immediate and delayed response of simulated human atrial myocytes to clinically-relevant hypokalemia"_.
+This repository contains the code needed to reproduce the figures and simulations for the paper _"Immediate and delayed response of simulated human atrial myocytes to clinically-relevant hypokalemia"_ [10.3389/fphys.2021.651162](https://doi.org/10.3389/fphys.2021.651162).
+To cite this work, please use the information provided in the [CITATION file](./CITATION).
 
 ## Requirements
 
